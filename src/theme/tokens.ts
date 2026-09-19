@@ -29,7 +29,7 @@ const light: Palette = {
   accent: ACCENT,
   accentSoft: '#FFF0E4',
   background: '#FFFFFF',
-  groupedBackground: '#F2F2F7',
+  groupedBackground: '#EFEFF4',
   card: '#FFFFFF',
   cardElevated: '#FFFFFF',
   separator: '#D8D8DE',
@@ -46,15 +46,17 @@ const light: Palette = {
 
 const dark: Palette = {
   accent: '#FF9447',
-  accentSoft: '#3A2312',
-  background: '#000000',
-  groupedBackground: '#0B0B0F',
-  card: '#1C1C1E',
-  cardElevated: '#2C2C2E',
-  separator: '#38383C',
-  text: '#F5F5F7',
-  textSecondary: '#A8A8B0',
-  textTertiary: '#7C7C86',
+  accentSoft: '#3D2514',
+  // Not pure black: cards need a surface to sit on, otherwise every grouped
+  // list dissolves into the background and the screen reads as unfinished.
+  background: '#141417',
+  groupedBackground: '#0C0C0E',
+  card: '#1E1E22',
+  cardElevated: '#2A2A30',
+  separator: '#3A3A41',
+  text: '#FAFAFC',
+  textSecondary: '#B4B4BE',
+  textTertiary: '#86868F',
   danger: '#FF6B5E',
   dangerSoft: '#3A1512',
   success: '#4ADE80',
@@ -80,6 +82,17 @@ export const radius = {
   md: 12,
   lg: 16,
   pill: 999,
+} as const;
+
+/** Type scale. Screens pick from here instead of inventing sizes. */
+export const type = {
+  hero: { size: 28, weight: '700' as const },
+  title: { size: 22, weight: '700' as const },
+  headline: { size: 17, weight: '600' as const },
+  body: { size: 17, weight: '400' as const },
+  callout: { size: 15, weight: '400' as const },
+  caption: { size: 13, weight: '400' as const },
+  label: { size: 12, weight: '600' as const },
 } as const;
 
 /** Minimum iOS hit target. */

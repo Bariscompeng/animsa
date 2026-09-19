@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import { SymbolView, type SFSymbol } from 'expo-symbols';
 
-import { MIN_TOUCH, radius, space } from '@/theme/tokens';
+import { MIN_TOUCH, radius, space, type } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
 
 // ---------------------------------------------------------------------- text
@@ -237,14 +237,15 @@ export function Button({
       accessibilityLabel={title}
       style={({ pressed }) => [
         {
-          minHeight: MIN_TOUCH,
-          paddingHorizontal: space.lg,
+          minHeight: MIN_TOUCH + 4,
+          paddingHorizontal: space.xl,
           paddingVertical: space.md,
           borderRadius: radius.md,
           backgroundColor: background,
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: disabled ? 0.4 : pressed ? 0.7 : 1,
+          opacity: disabled ? 0.4 : pressed ? 0.75 : 1,
+          transform: [{ scale: pressed && variant !== 'plain' ? 0.98 : 1 }],
         },
         style,
       ]}
@@ -252,7 +253,15 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={textColor} />
       ) : (
-        <Text style={{ color: textColor, fontSize: 17, fontWeight: '600' }}>{title}</Text>
+        <Text
+          style={{
+            color: textColor,
+            fontSize: type.headline.size,
+            fontWeight: type.headline.weight,
+          }}
+        >
+          {title}
+        </Text>
       )}
     </Pressable>
   );
@@ -412,13 +421,24 @@ export function EmptyState({
   const { colors } = useTheme();
   return (
     <View style={{ alignItems: 'center', paddingVertical: space.xxl, paddingHorizontal: space.xl }}>
-      <Icon name={icon} size={44} color={colors.textTertiary} />
+      <View
+        style={{
+          width: 88,
+          height: 88,
+          borderRadius: 44,
+          backgroundColor: colors.accentSoft,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Icon name={icon} size={38} color={colors.accent} />
+      </View>
       <Text
         style={{
           color: colors.text,
-          fontSize: 18,
-          fontWeight: '600',
-          marginTop: space.lg,
+          fontSize: type.title.size,
+          fontWeight: type.title.weight,
+          marginTop: space.xl,
           textAlign: 'center',
         }}
       >
@@ -427,10 +447,10 @@ export function EmptyState({
       <Text
         style={{
           color: colors.textSecondary,
-          fontSize: 15,
+          fontSize: type.callout.size,
           marginTop: space.sm,
           textAlign: 'center',
-          lineHeight: 21,
+          lineHeight: 22,
         }}
       >
         {description}
@@ -439,8 +459,7 @@ export function EmptyState({
         <Button
           title={action.label}
           onPress={action.onPress}
-          variant="secondary"
-          style={{ marginTop: space.lg }}
+          style={{ marginTop: space.xl, paddingHorizontal: space.xxl }}
         />
       ) : null}
     </View>

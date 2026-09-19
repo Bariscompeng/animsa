@@ -6,7 +6,6 @@
  */
 import { useMemo, useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Chip, Icon, IconButton } from '@/components/ui';
 import { useKeyboardHeight } from '@/components/useKeyboardHeight';
@@ -16,9 +15,6 @@ import { parseTaskInput, type ParsedTask } from '@/domain/nlp/parseTaskInput';
 import { MIN_TOUCH, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
 
-/** Height of the JS tab bar the quick-add row sits above. */
-const TAB_BAR_HEIGHT = 49;
-
 export type QuickAddProps = {
   onSubmit: (parsed: ParsedTask, raw: string) => void | Promise<void>;
   onOpenForm: (parsed: ParsedTask, raw: string) => void;
@@ -27,7 +23,6 @@ export type QuickAddProps = {
 
 export function QuickAddBar({ onSubmit, onOpenForm, placeholder }: QuickAddProps) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const keyboardHeight = useKeyboardHeight();
   const [text, setText] = useState('');
 
@@ -58,12 +53,13 @@ export function QuickAddBar({ onSubmit, onOpenForm, placeholder }: QuickAddProps
   const canSubmit = parsed.title.trim().length > 0;
 
   /**
-   * When the keyboard is up, lift the bar clear of it — minus the tab bar,
-   * which react-navigation hides at the same moment, and minus the home
-   * indicator inset the keyboard already covers.
+   * `endCoordinates.height` is the distance from the bottom of the window to
+   * the top of the keyboard, and `tabBarHideOnKeyboard` removes the tab bar at
+   * the same moment — so the row's own bottom edge is the window's, and it has
+   * to rise by the full keyboard height. Subtracting the tab bar here (as an
+   * earlier attempt did) leaves the input buried under the keyboard.
    */
-  const lift =
-    keyboardHeight > 0 ? Math.max(0, keyboardHeight - TAB_BAR_HEIGHT - insets.bottom) : 0;
+  const lift = keyboardHeight > 0 ? keyboardHeight : 0;
 
   return (
     <View

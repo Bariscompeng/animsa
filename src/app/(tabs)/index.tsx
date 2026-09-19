@@ -14,7 +14,15 @@ import { SignatureBanner } from '@/components/SignatureBanner';
 import { SuggestionCard } from '@/components/SuggestionCard';
 import { TaskRow } from '@/components/TaskRow';
 import { useToast } from '@/components/Toast';
-import { Caption, EmptyState, Row, Screen, SectionHeader, Separator } from '@/components/ui';
+import {
+  CardGroup,
+  Caption,
+  EmptyState,
+  Row,
+  Screen,
+  SectionHeader,
+  Separator,
+} from '@/components/ui';
 import {
   completeOccurrence,
   createTask,
@@ -310,7 +318,10 @@ export default function TodayScreen() {
             <EmptyState
               icon="checklist"
               title="Henüz görev yok"
-              description={'Aşağıya yazarak ekle:\n"yarın 9\'da ilaç"'}
+              description={
+                'Aşağıdaki satıra Türkçe yazman yeterli:\n"yarın 9\'da ilaç" · "her sabah 8\'de vitamin"'
+              }
+              action={{ label: 'Görev ekle', onPress: () => router.navigate('/task/new') }}
             />
           ) : null
         }
@@ -345,12 +356,14 @@ export default function TodayScreen() {
         )}
         ItemSeparatorComponent={Separator}
         ListFooterComponent={
-          <View style={{ paddingVertical: space.lg }}>
-            <Row
-              title={showCompleted ? 'Tamamlananları gizle' : 'Tamamlananları göster'}
-              icon={showCompleted ? 'eye.slash' : 'eye'}
-              onPress={() => setShowCompleted((v) => !v)}
-            />
+          <View style={{ paddingTop: space.lg, paddingBottom: space.xxl }}>
+            <CardGroup>
+              <Row
+                title={showCompleted ? 'Tamamlananları gizle' : 'Tamamlananları göster'}
+                icon={showCompleted ? 'eye.slash' : 'eye'}
+                onPress={() => setShowCompleted((v) => !v)}
+              />
+            </CardGroup>
           </View>
         }
         style={{ backgroundColor: colors.groupedBackground }}

@@ -38,6 +38,7 @@ import { formatQty, formatShortDate, parseDateKey, toDateKey } from '@/domain/fo
 import { matchesPrefix } from '@/domain/normalize';
 import { parseItemInput } from '@/domain/nlp/parseItemInput';
 import type { CategoryLike } from '@/domain/types';
+import { useKeyboardHeight } from '@/components/useKeyboardHeight';
 import { scheduleSync } from '@/services/sync';
 import { MIN_TOUCH, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
@@ -55,6 +56,7 @@ export default function ListScreen() {
   const router = useRouter();
   const toast = useToast();
 
+  const keyboardHeight = useKeyboardHeight();
   const [segment, setSegment] = useState<Segment>('list');
   const [items, setItems] = useState<ItemFull[]>([]);
   const [categories, setCategories] = useState<CategoryLike[]>([]);
@@ -353,9 +355,11 @@ export default function ListScreen() {
       <View
         style={{
           flexDirection: 'row',
-          gap: space.sm,
-          padding: space.lg,
-          backgroundColor: colors.background,
+          gap: space.xs,
+          margin: space.lg,
+          padding: space.xs,
+          borderRadius: radius.md,
+          backgroundColor: colors.groupedBackground,
         }}
       >
         {SEGMENTS.map((s) => (
@@ -367,18 +371,22 @@ export default function ListScreen() {
             accessibilityLabel={s.label}
             style={{
               flex: 1,
-              minHeight: MIN_TOUCH - 8,
+              minHeight: MIN_TOUCH - 6,
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: radius.md,
-              backgroundColor: segment === s.key ? colors.accentSoft : colors.groupedBackground,
+              borderRadius: radius.sm,
+              backgroundColor: segment === s.key ? colors.card : 'transparent',
+              shadowColor: '#000',
+              shadowOpacity: segment === s.key ? 0.16 : 0,
+              shadowRadius: 4,
+              shadowOffset: { width: 0, height: 1 },
             }}
           >
             <Text
               style={{
                 color: segment === s.key ? colors.accent : colors.textSecondary,
                 fontSize: 15,
-                fontWeight: segment === s.key ? '600' : '400',
+                fontWeight: segment === s.key ? '700' : '500',
               }}
             >
               {s.label}
@@ -419,11 +427,13 @@ export default function ListScreen() {
       {segment !== 'pantry' ? (
         <View
           style={{
+            // Lift clear of the keyboard, exactly as the Today quick-add does.
+            marginBottom: keyboardHeight,
             borderTopWidth: 1,
             borderTopColor: colors.separator,
             backgroundColor: colors.background,
             paddingHorizontal: space.lg,
-            paddingTop: space.sm,
+            paddingTop: space.md,
             paddingBottom: space.md,
           }}
         >
