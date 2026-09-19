@@ -20,9 +20,18 @@ bu adım şart.
   (veya <https://cli.github.com> adresinden indir)
 - **Ubuntu:** <https://github.com/cli/cli/blob/trunk/docs/install_linux.md>
 
-Kurulumdan sonra **yeni bir terminal aç** ve giriş yap:
+Kurulumdan sonra **yeni bir terminal aç** — mevcut pencere `gh`'yi göremez,
+çünkü PATH'i kurulumdan önce yüklenmiştir. Yeni pencere açmak istemezsen aynı
+oturumda şunu çalıştır:
 
-```bash
+```powershell
+$env:Path += ";C:\Program Files\GitHub CLI"
+gh --version
+```
+
+Sonra giriş yap:
+
+```powershell
 gh auth login
 ```
 
@@ -33,12 +42,16 @@ Sorulara: `GitHub.com` → `HTTPS` → `Y` (kimlik doğrulama için Git) →
 
 Proje klasöründe:
 
-```bash
+```powershell
 git init
 git add .
 git commit -m "Initial commit: Animsa"
 gh repo create animsa --public --source . --remote origin --push
 ```
+
+> **PowerShell notu:** Windows PowerShell 5.1 `&&` operatörünü desteklemez.
+> Komutları ayrı satırlarda çalıştır; zincirlemen gerekiyorsa
+> `komut1; if ($?) { komut2 }` biçimini kullan.
 
 > **Depo neden public?** Public depolarda GitHub Actions dakikaları (macOS
 > dahil) ücretsiz. Ayrıca release dosyaları herkese açık URL alır — AltStore
@@ -53,10 +66,13 @@ Kullanıcı adını öğrenmek için: `gh api user -q .login`
 
 ### 0.3 İlk derlemeyi başlat
 
-```bash
+```powershell
 gh workflow run ios.yml -f variant=release
 gh run watch
 ```
+
+`gh run watch` hangi çalışmayı izleyeceğini sorarsa, bir önceki komutun
+yazdırdığı numarayı doğrudan ver: `gh run watch <numara>`.
 
 ~15–25 dakika sürer. Bittiğinde depoda iki release olur:
 
@@ -252,7 +268,7 @@ Diğer bağlantılar:
 
 ### Günlük kullanım sürümü çıkarmak
 
-```bash
+```powershell
 npm version patch
 git push --follow-tags
 ```
@@ -279,7 +295,7 @@ Bağlanamazsan:
 `app.config.ts`, izin metinleri, Swift kodu veya yeni bir native paket
 eklediysen JS güncellemesi yetmez:
 
-```bash
+```powershell
 gh workflow run ios.yml -f variant=dev
 gh run watch
 ```
