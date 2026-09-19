@@ -21,7 +21,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const POD_NAME = 'AlarmKit';
+const POD_NAME = 'AnimsaAlarmKit';
 const MODULE_CLASS = 'AlarmKitModule';
 
 function fail(message) {

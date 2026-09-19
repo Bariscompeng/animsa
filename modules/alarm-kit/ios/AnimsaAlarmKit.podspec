@@ -3,9 +3,12 @@ require 'json'
 package = JSON.parse(File.read(File.join(__dir__, '..', '..', '..', 'package.json')))
 
 Pod::Spec.new do |s|
-  s.name           = 'AlarmKit'
+  s.name           = 'AnimsaAlarmKit'
   s.version        = package['version']
   s.summary        = 'AlarmKit bridge for Animsa'
+  # NOTE: the pod must NOT be called 'AlarmKit'. The generated
+  # ExpoModulesProvider emits `import <podName>`, which would resolve to
+  # Apple's own AlarmKit framework instead of this module.
   s.description    = 'Schedules real iOS alarms that ring through silent mode and Focus.'
   s.author         = 'Baris Coskun'
   s.homepage       = 'https://github.com/bariscoskun/animsa'

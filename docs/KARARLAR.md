@@ -166,7 +166,34 @@ Bu yüzden podspec `ios/` altına taşındı — kurulu tüm gerçek modüller d
 - `build-ios.sh` → aynı betik, derlenmiş `.app` ile: `AlarmKit` izi ana ikilide
   veya bir framework'te gerçekten var mı?
 
-## 18. Depo oluşturma kullanıcıya bırakıldı
+## 18. Pod adı `AnimsaAlarmKit` — `AlarmKit` olamaz
+
+17'deki düzeltmeden sonra pod gerçekten kuruldu (`Installing AlarmKit (1.0.0)`,
+`Target 'AlarmKit' in project 'Pods'`) ama derleme tek bir hatayla düştü:
+
+```
+ExpoModulesProvider.swift:96:16: error: cannot find 'AlarmKitModule' in scope
+      (module: AlarmKitModule.self, name: nil),
+```
+
+Autolinking, Swift modül adını **pod adından** türetiyor (`getSwiftModuleNames`)
+ve üretilen `ExpoModulesProvider.swift` dosyasına `import <podAdı>` yazıyor.
+Pod'a `AlarmKit` dediğim için bu satır **Apple'ın kendi AlarmKit framework'üne**
+gidiyordu; benim sınıfım orada yok.
+
+Çözüm: pod `AnimsaAlarmKit` olarak yeniden adlandırıldı.
+
+- Provider artık `import AnimsaAlarmKit` yazıyor → `AlarmKitModule` görünür.
+- Kendi dosyamdaki `import AlarmKit` artık tek anlamlı: Apple'ın framework'ü.
+- **JS tarafı etkilenmiyor**: `requireOptionalNativeModule('AlarmKit')` Swift'teki
+  `Name("AlarmKit")` ile eşleşir, pod adıyla değil.
+
+**Yan bulgu:** bu derlemede `AlarmKitModule.swift` için tek bir hata çıkmadı.
+Yani spec §6'daki Swift taslağından uyarlanan AlarmKit API kullanımı
+(`AlarmManager.shared.schedule`, `AlarmAttributes`, `Alarm.Schedule.Relative`,
+`Locale.Weekday` eşlemesi) Xcode 26 ile olduğu gibi derleniyor.
+
+## 19. Depo oluşturma kullanıcıya bırakıldı
 
 Geliştirme makinesinde GitHub CLI (`gh`) kurulu değil, dolayısıyla
 `gh repo create` çalıştırılamadı. Kod ve iş akışları hazır; depo oluşturma
