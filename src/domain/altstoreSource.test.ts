@@ -117,7 +117,12 @@ describe('upsertVersion', () => {
   });
 
   it('replaces a rebuild of the same version and build', () => {
-    let src = upsertVersion(emptySource(ICON), 'release', version({ sha256: 'a'.repeat(64) }), META);
+    let src = upsertVersion(
+      emptySource(ICON),
+      'release',
+      version({ sha256: 'a'.repeat(64) }),
+      META,
+    );
     src = upsertVersion(src, 'release', version({ sha256: 'b'.repeat(64) }), META);
     const versions = appFor(src, 'release')!.versions;
     expect(versions).toHaveLength(1);
@@ -144,7 +149,10 @@ describe('upsertVersion', () => {
   });
 
   it('carries the privacy strings through verbatim', () => {
-    const privacy = { NSCameraUsageDescription: 'Kamera izni', NSAlarmKitUsageDescription: 'Alarm' };
+    const privacy = {
+      NSCameraUsageDescription: 'Kamera izni',
+      NSAlarmKitUsageDescription: 'Alarm',
+    };
     const src = upsertVersion(emptySource(ICON), 'release', version(), { iconUrl: ICON, privacy });
     expect(appFor(src, 'release')!.appPermissions.privacy).toEqual(privacy);
   });

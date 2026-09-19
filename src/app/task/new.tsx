@@ -3,10 +3,11 @@
  * parser already understood, so nothing the user typed is lost.
  */
 import { useCallback, useState } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { EMPTY_TASK, TaskForm, type TaskFormValue } from '@/components/TaskForm';
 import { useToast } from '@/components/Toast';
+import { getSetting } from '@/db/repos/settings';
 import { createTask } from '@/db/repos/tasks';
 import { parseTaskInput } from '@/domain/nlp/parseTaskInput';
 import { scheduleSync } from '@/services/sync';
@@ -29,6 +30,19 @@ export default function NewTaskScreen() {
       reminderType: parsed.reminderType ?? 'none',
     };
   });
+
+  // Pull in the user's default lead time, unless the draft already set one.
+  useFocusEffect(
+    useCallback(() => {
+      void getSetting('defaultLeadMinutes').then((minutes) => {
+        setValue((prev) =>
+          prev.leadMinutes === 0 && prev.reminderType !== 'none'
+            ? { ...prev, leadMinutes: minutes }
+            : prev,
+        );
+      });
+    }, []),
+  );
 
   const submit = useCallback(async () => {
     await createTask({

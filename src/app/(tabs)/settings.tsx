@@ -7,6 +7,7 @@ import { Alert, ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 
+import { ChoiceRow } from '@/components/ChoiceRow';
 import { useToast } from '@/components/Toast';
 import { Button, Caption, Row, Screen, SectionHeader, Separator, SwitchRow } from '@/components/ui';
 import { loadSettings, setSetting } from '@/db/repos/settings';
@@ -225,6 +226,22 @@ export default function SettingsScreen() {
           onValueChange={(v) => void update('eveningPreviewEnabled', v)}
         />
         <Separator />
+        <ChoiceRow
+          title="Varsayılan önceden hatırlat"
+          subtitle="Yeni görevlerde önceden hatırlatma varsayılanı"
+          icon="bell.badge"
+          value={settings.defaultLeadMinutes}
+          options={[
+            { label: 'Yok', value: 0 },
+            { label: '5 dk', value: 5 },
+            { label: '15 dk', value: 15 },
+            { label: '30 dk', value: 30 },
+            { label: '1 saat', value: 60 },
+            { label: '1 gün', value: 1440 },
+          ]}
+          onChange={(v) => void update('defaultLeadMinutes', v)}
+        />
+        <Separator />
         <SwitchRow
           title="Son kullanma hatırlatmaları"
           subtitle="Tarihten 2 gün ve 1 gün önce 09:00"
@@ -241,6 +258,21 @@ export default function SettingsScreen() {
           icon="map"
           value={settings.autoDiscoverPlaces}
           onValueChange={(v) => void update('autoDiscoverPlaces', v)}
+        />
+        <Separator />
+        <ChoiceRow
+          title="Konum bildirimi bekleme süresi"
+          subtitle="İki konum bildirimi arasındaki en kısa süre"
+          icon="timer"
+          value={settings.locationCooldownMinutes}
+          options={[
+            { label: '5 dk', value: 5 },
+            { label: '10 dk', value: 10 },
+            { label: '20 dk', value: 20 },
+            { label: '45 dk', value: 45 },
+            { label: '2 saat', value: 120 },
+          ]}
+          onChange={(v) => void update('locationCooldownMinutes', v)}
         />
         <Separator />
         <Row

@@ -28,6 +28,7 @@ import { addDays, formatLongDate, startOfDay, toDateKey } from '@/domain/format'
 import { expandOccurrences } from '@/domain/recurrence';
 import type { Occurrence, OccurrenceState, TaskLike } from '@/domain/types';
 import type { ParsedTask } from '@/domain/nlp/parseTaskInput';
+import { getSetting } from '@/db/repos/settings';
 import { scheduleSync } from '@/services/sync';
 import { space } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
@@ -161,12 +162,15 @@ export default function TodayScreen() {
   const handleQuickAdd = useCallback(
     async (parsed: ParsedTask) => {
       if (!parsed.title.trim()) return;
+      const reminderType = parsed.reminderType ?? 'none';
       await createTask({
         title: parsed.title,
         dueDate: parsed.date ?? toDateKey(new Date()),
         dueTime: parsed.time ?? null,
         rrule: parsed.rule ?? null,
-        reminderType: parsed.reminderType ?? 'none',
+        reminderType,
+        // A reminder-less task has nothing to remind early about.
+        leadMinutes: reminderType === 'none' ? 0 : await getSetting('defaultLeadMinutes'),
       });
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       refresh();
