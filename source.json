@@ -12,11 +12,21 @@
       "tintColor": "#FF7A1A",
       "screenshotURLs": [],
       "version": "1.0.0",
-      "versionDate": "2026-09-19T17:42:48.471Z",
-      "versionDescription": "- Fix keyboard overlap and map jumping, and give the UI more structure",
-      "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-7/Animsa-release-1.0.0-7.ipa",
-      "size": 13475530,
+      "versionDate": "2026-09-19T18:32:25.754Z",
+      "versionDescription": "- Make the quick-add row clear the keyboard, and lift contrast across the UI",
+      "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-9/Animsa-release-1.0.0-9.ipa",
+      "size": 13476338,
       "versions": [
+        {
+          "version": "1.0.0",
+          "buildVersion": "9",
+          "date": "2026-09-19T18:32:25.754Z",
+          "localizedDescription": "- Make the quick-add row clear the keyboard, and lift contrast across the UI",
+          "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-9/Animsa-release-1.0.0-9.ipa",
+          "size": 13476338,
+          "sha256": "c0bb9b5f7965af1e17e10bd64364956ebba0bde627ebf902eb44860760921754",
+          "minOSVersion": "26.0"
+        },
         {
           "version": "1.0.0",
           "buildVersion": "7",
