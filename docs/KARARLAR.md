@@ -206,20 +206,48 @@ Log'da `AnimsaAlarmKit` için **hiçbir `swiftc` çağrısı yok** — diğer po
 `builtin-SwiftDriver -- swiftc -module-name EXDevMenuInterface ...` satırları
 varken bunda yoktu. Yani hedef kaynaksız derlendi, modül hiç üretilmedi.
 
-Sebep: podspec'te `s.swift_version` eksikti. CocoaPods, Swift sürümü
-bildirilmemiş bir pod için Swift derlemesini kurmuyor; `.swift` dosyaları
-sessizce derlenmemiş kalıyor. Kurulu her Expo modülünde bu satır var
-(`expo-haptics`: `s.swift_version = '5.9'`).
+İlk teşhisim `s.swift_version` eksikliğiydi ve **yanlıştı** (bkz. §20).
+`swift_version` yine de eklendi: kurulu her Expo modülünde var
+(`expo-haptics`: `s.swift_version = '5.9'`) ve CocoaPods bunu Swift derlemesini
+kurmak için kullanıyor. Podspec artık `expo-haptics`'inkiyle aynı iskelete
+oturuyor: `swift_version`, gerçek bir `source` URL'si ve
+`source_files = '**/*.{h,m,swift}'`.
 
-Podspec artık `expo-haptics`'inkiyle birebir aynı iskelete oturuyor:
-`swift_version`, gerçek bir `source` URL'si ve `source_files = '**/*.{h,m,swift}'`.
+Gerçek sebep bir sonraki maddede.
 
-`scripts/check-alarmkit.mjs` bu turu da koruma altına aldı: podspec'te
-`swift_version` bildirilmiş mi ve yanında en az bir `.swift` dosyası var mı?
-Böylece aynı hata 10 dakikalık macOS derlemesi yerine 30 saniyelik `check`
-işinde yakalanıyor.
+## 20. `.gitignore`'da `ios/` sabitlenmeli: `/ios/`
 
-## 20. Depo oluşturma kullanıcıya bırakıldı
+19'daki `swift_version` düzeltmesini gönderdim ve `check` işi 49 saniyede
+kırmızı döndü — ama yeni yazdığım koruma sayesinde, macOS derlemesi harcanmadan:
+
+```
+✗ /home/runner/work/animsa/animsa/modules/alarm-kit/ios içinde hiç .swift dosyası yok.
+```
+
+**Asıl sebep buydu.** `.gitignore`'daki `ios/` kalıbı sabitlenmemişti; git'te
+eğik çizgi içermeyen bir kalıp **her derinlikteki** aynı adlı dizini eşler. Yani
+prebuild çıktısını hariç tutmak için yazdığım satır,
+`modules/alarm-kit/ios/` klasörünü de hariç tutuyordu:
+
+| Dosya | Durum |
+|---|---|
+| `modules/alarm-kit/ios/AlarmKitModule.swift` | **ignore edildi, hiç commit edilmedi** |
+| `modules/alarm-kit/ios/AnimsaAlarmKit.podspec` | izleniyordu — `git mv` ignore'u zorla geçtiği için |
+
+Bu yüzden runner'da podspec vardı ama Swift dosyası yoktu: pod kuruluyor, hedef
+oluşuyor, derlenecek kaynak bulunamıyor, modül üretilmiyor ve uygulama
+"no such module" ile düşüyordu. Yerelde her şey doğru göründüğü için fark
+edilmesi zordu.
+
+Düzeltme: kalıplar köke sabitlendi (`/ios/`, `/android/`). Kök `ios/` hâlâ
+hariç, modül dizini artık değil.
+
+`scripts/check-alarmkit.mjs` artık dosyanın diskte olmasıyla yetinmiyor,
+`git ls-files --error-unmatch` ile **izlendiğini** de doğruluyor. Yapay olarak
+geri getirilip test edildi: dosya `git rm --cached` ile izlemeden çıkarıldığında
+koruma doğru şekilde kırmızı veriyor.
+
+## 21. Depo oluşturma kullanıcıya bırakıldı
 
 Geliştirme makinesinde GitHub CLI (`gh`) kurulu değil, dolayısıyla
 `gh repo create` çalıştırılamadı. Kod ve iş akışları hazır; depo oluşturma

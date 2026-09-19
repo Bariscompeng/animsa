@@ -84,7 +84,34 @@ if (swiftFiles.length === 0) {
   fail(`${podspecDir} içinde hiç .swift dosyası yok.`);
 }
 
-console.log(`✓ Podspec: swift_version bildirilmiş, ${swiftFiles.length} Swift dosyası var`);
+// Present on disk is not enough: a .gitignore pattern once excluded this very
+// directory, so the file existed locally and was absent from every clone CI
+// made. Ask git what it actually tracks.
+const untracked = swiftFiles.filter((file) => {
+  try {
+    execFileSync('git', ['ls-files', '--error-unmatch', join(podspecDir, file)], {
+      stdio: 'ignore',
+      shell: process.platform === 'win32',
+    });
+    return false;
+  } catch {
+    return true;
+  }
+});
+
+if (untracked.length > 0) {
+  fail(
+    `Bu Swift dosyaları git tarafından izlenmiyor: ${untracked.join(', ')}
+` +
+      `  Yerelde varlar ama CI'nin klonunda olmayacaklar; modül kaynaksız derlenir.
+` +
+      `  .gitignore'da sabitlenmemiş bir "ios/" kalıbı olup olmadığına bak.`,
+  );
+}
+
+console.log(
+  `✓ Podspec: swift_version bildirilmiş, ${swiftFiles.length} Swift dosyası var ve git'te izleniyor`,
+);
 
 // ------------------------------------------------- 3. presence in the binary
 
