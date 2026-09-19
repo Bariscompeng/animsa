@@ -193,7 +193,33 @@ Yani spec §6'daki Swift taslağından uyarlanan AlarmKit API kullanımı
 (`AlarmManager.shared.schedule`, `AlarmAttributes`, `Alarm.Schedule.Relative`,
 `Locale.Weekday` eşlemesi) Xcode 26 ile olduğu gibi derleniyor.
 
-## 19. Depo oluşturma kullanıcıya bırakıldı
+## 19. Podspec'te `swift_version` zorunlu
+
+18'den sonra pod doğru adla kuruldu (`Installing AnimsaAlarmKit (1.0.0)`) ve
+hedef oluştu, ama derleme yine tek hatayla düştü:
+
+```
+ExpoModulesProvider.swift:11:17: error: no such module 'AnimsaAlarmKit'
+```
+
+Log'da `AnimsaAlarmKit` için **hiçbir `swiftc` çağrısı yok** — diğer pod'larda
+`builtin-SwiftDriver -- swiftc -module-name EXDevMenuInterface ...` satırları
+varken bunda yoktu. Yani hedef kaynaksız derlendi, modül hiç üretilmedi.
+
+Sebep: podspec'te `s.swift_version` eksikti. CocoaPods, Swift sürümü
+bildirilmemiş bir pod için Swift derlemesini kurmuyor; `.swift` dosyaları
+sessizce derlenmemiş kalıyor. Kurulu her Expo modülünde bu satır var
+(`expo-haptics`: `s.swift_version = '5.9'`).
+
+Podspec artık `expo-haptics`'inkiyle birebir aynı iskelete oturuyor:
+`swift_version`, gerçek bir `source` URL'si ve `source_files = '**/*.{h,m,swift}'`.
+
+`scripts/check-alarmkit.mjs` bu turu da koruma altına aldı: podspec'te
+`swift_version` bildirilmiş mi ve yanında en az bir `.swift` dosyası var mı?
+Böylece aynı hata 10 dakikalık macOS derlemesi yerine 30 saniyelik `check`
+işinde yakalanıyor.
+
+## 20. Depo oluşturma kullanıcıya bırakıldı
 
 Geliştirme makinesinde GitHub CLI (`gh`) kurulu değil, dolayısıyla
 `gh repo create` çalıştırılamadı. Kod ve iş akışları hazır; depo oluşturma

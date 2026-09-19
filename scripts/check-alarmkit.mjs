@@ -61,7 +61,32 @@ if (!(entry.modules ?? []).some((m) => m.class === MODULE_CLASS)) {
 
 console.log(`✓ Autolinking: ${POD_NAME} pod'u ve ${MODULE_CLASS} sınıfı çözümlendi`);
 
-// ------------------------------------------------- 2. presence in the binary
+// ------------------------------------------------------- 2. podspec sanity
+
+const podspecDir = entry.pods.find((p) => p.podName === POD_NAME).podspecDir;
+const podspec = readFileSync(join(podspecDir, `${POD_NAME}.podspec`), 'utf8');
+
+// A Swift pod without swift_version installs cleanly and then compiles nothing:
+// the target exists, no swiftc ever runs, and the app fails much later with
+// "no such module". Catch it here instead.
+if (!/s\.swift_version\s*=/.test(podspec)) {
+  fail(
+    `${POD_NAME}.podspec içinde swift_version yok.
+` +
+      `  CocoaPods bu durumda Swift derlemesini hiç kurmaz; hedef kaynaksız kalır
+` +
+      `  ve uygulama "no such module '${POD_NAME}'" ile düşer.`,
+  );
+}
+
+const swiftFiles = readdirSync(podspecDir).filter((f) => f.endsWith('.swift'));
+if (swiftFiles.length === 0) {
+  fail(`${podspecDir} içinde hiç .swift dosyası yok.`);
+}
+
+console.log(`✓ Podspec: swift_version bildirilmiş, ${swiftFiles.length} Swift dosyası var`);
+
+// ------------------------------------------------- 3. presence in the binary
 
 const appPath = process.argv[2];
 if (!appPath) {
