@@ -58,6 +58,7 @@ export function PlaceForm({
       style={{ backgroundColor: colors.groupedBackground }}
       contentContainerStyle={{ paddingBottom: space.xxl }}
       keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
     >
       <View style={{ padding: space.lg, backgroundColor: colors.card }}>
         <TextInput
@@ -124,7 +125,13 @@ export function PlaceForm({
         onPress={() =>
           router.navigate({
             pathname: '/place/pick',
-            params: { lat: String(value.lat), lng: String(value.lng) },
+            params: {
+              lat: String(value.lat),
+              lng: String(value.lng),
+              // The picker draws the real trigger area, so it needs both.
+              type: value.type,
+              radius: String(value.radiusM),
+            },
           })
         }
       />

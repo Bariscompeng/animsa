@@ -105,6 +105,8 @@ export default function ItemScreen() {
     <ScrollView
       style={{ backgroundColor: colors.groupedBackground }}
       contentContainerStyle={{ paddingBottom: space.xxl }}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
     >
       <View style={{ padding: space.lg, backgroundColor: colors.card }}>
         <TextInput

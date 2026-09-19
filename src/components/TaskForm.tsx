@@ -237,6 +237,7 @@ export function TaskForm({
       style={{ backgroundColor: colors.groupedBackground }}
       contentContainerStyle={{ paddingBottom: space.xxl }}
       keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
     >
       <View style={{ padding: space.lg, gap: space.md, backgroundColor: colors.card }}>
         <TextInput

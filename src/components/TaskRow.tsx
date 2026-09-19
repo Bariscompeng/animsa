@@ -108,10 +108,13 @@ function TaskRowComponent({
           flexDirection: 'row',
           alignItems: 'center',
           gap: space.md,
-          minHeight: MIN_TOUCH + 8,
-          paddingHorizontal: space.lg,
+          minHeight: MIN_TOUCH + 12,
+          paddingLeft: space.lg - 4,
+          paddingRight: space.lg,
           paddingVertical: space.md,
           backgroundColor: pressed ? colors.groupedBackground : colors.card,
+          borderLeftWidth: 4,
+          borderLeftColor: overdue ? colors.danger : task.important ? colors.accent : 'transparent',
         })}
       >
         <Pressable
@@ -145,7 +148,6 @@ function TaskRowComponent({
               textDecorationLine: completed ? 'line-through' : 'none',
             }}
           >
-            {task.important ? '⚑ ' : ''}
             {task.title}
           </Text>
           <Text
@@ -155,16 +157,19 @@ function TaskRowComponent({
               marginTop: 2,
             }}
           >
+            {overdue ? 'Gecikmiş · ' : ''}
             {timeLabel}
             {occurrence.snoozed ? ' · ertelendi' : ''}
           </Text>
         </View>
 
         <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
-          {task.rrule ? <Icon name="repeat" size={15} /> : null}
-          {task.reminderType === 'alarm' ? <Icon name="alarm" size={15} /> : null}
+          {task.rrule ? <Icon name="repeat" size={14} color={colors.textTertiary} /> : null}
+          {task.reminderType === 'alarm' ? (
+            <Icon name="alarm.fill" size={14} color={colors.accent} />
+          ) : null}
           {task.locationTrigger || task.onHomeExit || task.onHomeArrive ? (
-            <Icon name="location" size={15} />
+            <Icon name="location.fill" size={14} color={colors.textTertiary} />
           ) : null}
         </View>
       </Pressable>

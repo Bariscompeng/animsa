@@ -26,6 +26,9 @@ export default function TabsLayout() {
         headerTintColor: colors.accent,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textTertiary,
+        // The quick-add row sits above this bar; hiding it on keyboard keeps
+        // the input reachable instead of stacked behind the keyboard.
+        tabBarHideOnKeyboard: true,
         tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.separator },
         sceneStyle: { backgroundColor: colors.groupedBackground },
       }}

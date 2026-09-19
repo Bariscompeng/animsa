@@ -5,7 +5,7 @@
  * hidden behind a toggle so the list stays about what is left to do.
  */
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, SectionList, View } from 'react-native';
+import { Alert, SectionList, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
@@ -157,6 +157,15 @@ export default function TodayScreen() {
 
   const isEmpty = sections.every((s) => s.data.length === 0) && tasks.length === 0;
 
+  /** Outstanding items today and earlier — what the header summarises. */
+  const openCount = useMemo(
+    () =>
+      sections
+        .filter((s) => s.title === 'Gecikmiş' || s.title === 'Bugün')
+        .reduce((total, s) => total + s.data.length, 0),
+    [sections],
+  );
+
   // ----------------------------------------------------------------- actions
 
   const handleQuickAdd = useCallback(
@@ -273,9 +282,25 @@ export default function TodayScreen() {
         stickySectionHeadersEnabled={false}
         ListHeaderComponent={
           <View>
-            <Caption style={{ paddingHorizontal: space.lg, paddingTop: space.sm }}>
-              {formatLongDate(new Date())}
-            </Caption>
+            <View
+              style={{ paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.xs }}
+            >
+              <Text
+                style={{
+                  color: colors.accent,
+                  fontSize: 13,
+                  fontWeight: '700',
+                  letterSpacing: 0.6,
+                }}
+              >
+                {formatLongDate(new Date()).toLocaleUpperCase('tr-TR')}
+              </Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 2 }}>
+                {openCount === 0
+                  ? 'Bugün için planlanmış bir şey yok'
+                  : `${openCount} görev seni bekliyor`}
+              </Text>
+            </View>
             <SignatureBanner />
             <SuggestionCard onChanged={refresh} />
           </View>

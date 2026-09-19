@@ -62,21 +62,77 @@ export function Caption({ children, style, numberOfLines }: TextProps) {
   );
 }
 
-export function SectionHeader({ children }: { children: ReactNode }) {
+export function SectionHeader({
+  children,
+  icon,
+  trailing,
+}: {
+  children: ReactNode;
+  icon?: SFSymbol;
+  trailing?: ReactNode;
+}) {
   const { colors } = useTheme();
   return (
-    <View style={{ paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.sm }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.sm,
+        paddingHorizontal: space.lg,
+        paddingTop: space.xl,
+        paddingBottom: space.sm,
+      }}
+    >
+      {icon ? <Icon name={icon} size={15} color={colors.textTertiary} /> : null}
       <Text
         style={{
+          flex: 1,
           color: colors.textSecondary,
           fontSize: 13,
-          fontWeight: '600',
+          fontWeight: '700',
           textTransform: 'uppercase',
-          letterSpacing: 0.5,
+          letterSpacing: 0.6,
         }}
       >
         {children}
       </Text>
+      {trailing}
+    </View>
+  );
+}
+
+/**
+ * Wraps rows in a rounded, inset card — the shape iOS uses for grouped lists.
+ * Edge-to-edge rows on a flat background are what make a screen read as
+ * unfinished, so every settings-style list goes through this.
+ */
+export function CardGroup({ children, footer }: { children: ReactNode; footer?: string }) {
+  const { colors } = useTheme();
+  return (
+    <View>
+      <View
+        style={{
+          marginHorizontal: space.lg,
+          borderRadius: radius.lg,
+          backgroundColor: colors.card,
+          overflow: 'hidden',
+        }}
+      >
+        {children}
+      </View>
+      {footer ? (
+        <Text
+          style={{
+            color: colors.textTertiary,
+            fontSize: 13,
+            lineHeight: 18,
+            paddingHorizontal: space.lg + space.sm,
+            paddingTop: space.sm,
+          }}
+        >
+          {footer}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -277,6 +333,9 @@ export function Row({
         {subtitle ? <Caption style={{ marginTop: 2 }}>{subtitle}</Caption> : null}
       </View>
       {right}
+      {onPress && !right ? (
+        <Icon name="chevron.right" size={13} color={colors.textTertiary} />
+      ) : null}
     </View>
   );
 

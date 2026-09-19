@@ -9,7 +9,16 @@ import Constants from 'expo-constants';
 
 import { ChoiceRow } from '@/components/ChoiceRow';
 import { useToast } from '@/components/Toast';
-import { Button, Caption, Row, Screen, SectionHeader, Separator, SwitchRow } from '@/components/ui';
+import {
+  Button,
+  Caption,
+  CardGroup,
+  Row,
+  Screen,
+  SectionHeader,
+  Separator,
+  SwitchRow,
+} from '@/components/ui';
 import { loadSettings, setSetting } from '@/db/repos/settings';
 import { formatDateTime, formatDuration } from '@/domain/format';
 import type { SettingsShape } from '@/services/settingsKeys';
@@ -139,241 +148,259 @@ export default function SettingsScreen() {
       <ScrollView contentInsetAdjustmentBehavior="automatic">
         {/* ------------------------------------------------------ permissions */}
         <SectionHeader>İzinler</SectionHeader>
-        <Row
-          title="Bildirimler"
-          subtitle={PERMISSION_LABEL[permissions.notifications]}
-          icon="bell"
-          onPress={() => {
-            if (permissions.notifications === 'undetermined') {
-              void requestNotifications().then(() => void reload());
-            } else {
-              void openSystemSettings();
+        <CardGroup>
+          <Row
+            title="Bildirimler"
+            subtitle={PERMISSION_LABEL[permissions.notifications]}
+            icon="bell"
+            onPress={() => {
+              if (permissions.notifications === 'undetermined') {
+                void requestNotifications().then(() => void reload());
+              } else {
+                void openSystemSettings();
+              }
+            }}
+          />
+          <Separator />
+          <Row
+            title="Alarmlar"
+            subtitle={PERMISSION_LABEL[permissions.alarms]}
+            icon="alarm"
+            onPress={() => {
+              if (permissions.alarms === 'undetermined') {
+                void requestAlarms().then(() => void reload());
+              } else if (permissions.alarms !== 'unavailable') {
+                void openSystemSettings();
+              }
+            }}
+          />
+          <Separator />
+          <Row
+            title="Konum"
+            subtitle={
+              permissions.location === 'partial'
+                ? '"Kullanırken" verildi — yer hatırlatmaları için "Her Zaman" gerekiyor'
+                : PERMISSION_LABEL[permissions.location]
             }
-          }}
-        />
-        <Separator />
-        <Row
-          title="Alarmlar"
-          subtitle={PERMISSION_LABEL[permissions.alarms]}
-          icon="alarm"
-          onPress={() => {
-            if (permissions.alarms === 'undetermined') {
-              void requestAlarms().then(() => void reload());
-            } else if (permissions.alarms !== 'unavailable') {
-              void openSystemSettings();
-            }
-          }}
-        />
-        <Separator />
-        <Row
-          title="Konum"
-          subtitle={
-            permissions.location === 'partial'
-              ? '"Kullanırken" verildi — yer hatırlatmaları için "Her Zaman" gerekiyor'
-              : PERMISSION_LABEL[permissions.location]
-          }
-          icon="location"
-          onPress={() => {
-            if (permissions.location === 'partial') {
-              void requestLocationAlways().then(() => void reload());
-            } else {
-              void openSystemSettings();
-            }
-          }}
-        />
-        <Separator />
-        <Row
-          title="Kamera"
-          subtitle={PERMISSION_LABEL[permissions.camera]}
-          icon="camera"
-          onPress={() => {
-            if (permissions.camera === 'undetermined') {
-              void requestCamera().then(() => void reload());
-            } else {
-              void openSystemSettings();
-            }
-          }}
-        />
+            icon="location"
+            onPress={() => {
+              if (permissions.location === 'partial') {
+                void requestLocationAlways().then(() => void reload());
+              } else {
+                void openSystemSettings();
+              }
+            }}
+          />
+          <Separator />
+          <Row
+            title="Kamera"
+            subtitle={PERMISSION_LABEL[permissions.camera]}
+            icon="camera"
+            onPress={() => {
+              if (permissions.camera === 'undetermined') {
+                void requestCamera().then(() => void reload());
+              } else {
+                void openSystemSettings();
+              }
+            }}
+          />
+        </CardGroup>
 
         {/* -------------------------------------------------------- reminders */}
         <SectionHeader>Hatırlatmalar</SectionHeader>
-        <Row
-          title="Sessiz saatler"
-          subtitle={
-            settings.quietHours.enabled
-              ? `${settings.quietHours.start} – ${settings.quietHours.end}`
-              : 'Kapalı'
-          }
-          icon="moon"
-          onPress={() => router.navigate('/settings/quiet-hours')}
-        />
-        <Separator />
-        <SwitchRow
-          title="Günlük özet"
-          subtitle={settings.summaryEnabled ? `Her gün ${settings.summaryTime}` : 'Kapalı'}
-          icon="sun.max"
-          value={settings.summaryEnabled}
-          onValueChange={(v) => void update('summaryEnabled', v)}
-        />
-        <Separator />
-        <SwitchRow
-          title="Akşam önizlemesi"
-          subtitle={
-            settings.eveningPreviewEnabled ? `Her akşam ${settings.eveningPreviewTime}` : 'Kapalı'
-          }
-          icon="moon.stars"
-          value={settings.eveningPreviewEnabled}
-          onValueChange={(v) => void update('eveningPreviewEnabled', v)}
-        />
-        <Separator />
-        <ChoiceRow
-          title="Varsayılan önceden hatırlat"
-          subtitle="Yeni görevlerde önceden hatırlatma varsayılanı"
-          icon="bell.badge"
-          value={settings.defaultLeadMinutes}
-          options={[
-            { label: 'Yok', value: 0 },
-            { label: '5 dk', value: 5 },
-            { label: '15 dk', value: 15 },
-            { label: '30 dk', value: 30 },
-            { label: '1 saat', value: 60 },
-            { label: '1 gün', value: 1440 },
-          ]}
-          onChange={(v) => void update('defaultLeadMinutes', v)}
-        />
-        <Separator />
-        <SwitchRow
-          title="Son kullanma hatırlatmaları"
-          subtitle="Tarihten 2 gün ve 1 gün önce 09:00"
-          icon="calendar.badge.clock"
-          value={settings.expiryRemindersEnabled}
-          onValueChange={(v) => void update('expiryRemindersEnabled', v)}
-        />
+        <CardGroup>
+          <Row
+            title="Sessiz saatler"
+            subtitle={
+              settings.quietHours.enabled
+                ? `${settings.quietHours.start} – ${settings.quietHours.end}`
+                : 'Kapalı'
+            }
+            icon="moon"
+            onPress={() => router.navigate('/settings/quiet-hours')}
+          />
+          <Separator />
+          <SwitchRow
+            title="Günlük özet"
+            subtitle={settings.summaryEnabled ? `Her gün ${settings.summaryTime}` : 'Kapalı'}
+            icon="sun.max"
+            value={settings.summaryEnabled}
+            onValueChange={(v) => void update('summaryEnabled', v)}
+          />
+          <Separator />
+          <SwitchRow
+            title="Akşam önizlemesi"
+            subtitle={
+              settings.eveningPreviewEnabled ? `Her akşam ${settings.eveningPreviewTime}` : 'Kapalı'
+            }
+            icon="moon.stars"
+            value={settings.eveningPreviewEnabled}
+            onValueChange={(v) => void update('eveningPreviewEnabled', v)}
+          />
+          <Separator />
+          <ChoiceRow
+            title="Varsayılan önceden hatırlat"
+            subtitle="Yeni görevlerde önceden hatırlatma varsayılanı"
+            icon="bell.badge"
+            value={settings.defaultLeadMinutes}
+            options={[
+              { label: 'Yok', value: 0 },
+              { label: '5 dk', value: 5 },
+              { label: '15 dk', value: 15 },
+              { label: '30 dk', value: 30 },
+              { label: '1 saat', value: 60 },
+              { label: '1 gün', value: 1440 },
+            ]}
+            onChange={(v) => void update('defaultLeadMinutes', v)}
+          />
+          <Separator />
+          <SwitchRow
+            title="Son kullanma hatırlatmaları"
+            subtitle="Tarihten 2 gün ve 1 gün önce 09:00"
+            icon="calendar.badge.clock"
+            value={settings.expiryRemindersEnabled}
+            onValueChange={(v) => void update('expiryRemindersEnabled', v)}
+          />
+        </CardGroup>
 
         {/* --------------------------------------------------------- location */}
         <SectionHeader>Konum</SectionHeader>
-        <SwitchRow
-          title="Otomatik market keşfi"
-          subtitle="Kaydetmediğin marketler de OpenStreetMap'ten bulunur"
-          icon="map"
-          value={settings.autoDiscoverPlaces}
-          onValueChange={(v) => void update('autoDiscoverPlaces', v)}
-        />
-        <Separator />
-        <ChoiceRow
-          title="Konum bildirimi bekleme süresi"
-          subtitle="İki konum bildirimi arasındaki en kısa süre"
-          icon="timer"
-          value={settings.locationCooldownMinutes}
-          options={[
-            { label: '5 dk', value: 5 },
-            { label: '10 dk', value: 10 },
-            { label: '20 dk', value: 20 },
-            { label: '45 dk', value: 45 },
-            { label: '2 saat', value: 120 },
-          ]}
-          onChange={(v) => void update('locationCooldownMinutes', v)}
-        />
-        <Separator />
-        <Row
-          title="Evden çıkarken listesi"
-          subtitle="Anahtar, cüzdan, çöp…"
-          icon="door.left.hand.open"
-          onPress={() => router.navigate('/settings/home-exit')}
-        />
+        <CardGroup>
+          <SwitchRow
+            title="Otomatik market keşfi"
+            subtitle="Kaydetmediğin marketler de OpenStreetMap'ten bulunur"
+            icon="map"
+            value={settings.autoDiscoverPlaces}
+            onValueChange={(v) => void update('autoDiscoverPlaces', v)}
+          />
+          <Separator />
+          <ChoiceRow
+            title="Konum bildirimi bekleme süresi"
+            subtitle="İki konum bildirimi arasındaki en kısa süre"
+            icon="timer"
+            value={settings.locationCooldownMinutes}
+            options={[
+              { label: '5 dk', value: 5 },
+              { label: '10 dk', value: 10 },
+              { label: '20 dk', value: 20 },
+              { label: '45 dk', value: 45 },
+              { label: '2 saat', value: 120 },
+            ]}
+            onChange={(v) => void update('locationCooldownMinutes', v)}
+          />
+          <Separator />
+          <Row
+            title="Evden çıkarken listesi"
+            subtitle="Anahtar, cüzdan, çöp…"
+            icon="door.left.hand.open"
+            onPress={() => router.navigate('/settings/home-exit')}
+          />
+        </CardGroup>
 
         {/* ------------------------------------------------------------- list */}
         <SectionHeader>Liste</SectionHeader>
-        <Row
-          title="Kategori sırası"
-          subtitle="Markette gezdiğin reyon sırası"
-          icon="list.bullet.indent"
-          onPress={() => router.navigate('/settings/categories')}
-        />
-        <Separator />
-        <SwitchRow
-          title="Önerileri listeye otomatik ekle"
-          subtitle="Bitmek üzere olan ürünler sorulmadan eklensin"
-          icon="sparkles"
-          value={settings.autoAddSuggestions}
-          onValueChange={(v) => void update('autoAddSuggestions', v)}
-        />
-        <Separator />
-        <Row
-          title="Liste hatırlatmaları"
-          subtitle="Belirli gün ve saatlerde listeyi hatırlat"
-          icon="clock"
-          onPress={() => router.navigate('/settings/list-rules')}
-        />
+        <CardGroup>
+          <Row
+            title="Kategori sırası"
+            subtitle="Markette gezdiğin reyon sırası"
+            icon="list.bullet.indent"
+            onPress={() => router.navigate('/settings/categories')}
+          />
+          <Separator />
+          <SwitchRow
+            title="Önerileri listeye otomatik ekle"
+            subtitle="Bitmek üzere olan ürünler sorulmadan eklensin"
+            icon="sparkles"
+            value={settings.autoAddSuggestions}
+            onValueChange={(v) => void update('autoAddSuggestions', v)}
+          />
+          <Separator />
+          <Row
+            title="Liste hatırlatmaları"
+            subtitle="Belirli gün ve saatlerde listeyi hatırlat"
+            icon="clock"
+            onPress={() => router.navigate('/settings/list-rules')}
+          />
+        </CardGroup>
 
         {/* -------------------------------------------------------- signature */}
         <SectionHeader>İmza</SectionHeader>
-        <Row title="İmza geçerliliği" subtitle={signatureLabel} icon="signature" />
-        <Separator />
-        <Row
-          title="AltStore'u aç"
-          subtitle="Süre dolmadan Yenile'ye bas"
-          icon="arrow.clockwise"
-          onPress={() => {
-            void openAltStore().then((opened) => {
-              if (!opened) {
-                Alert.alert(
-                  'AltStore bulunamadı',
-                  "AltStore kurulu değil gibi görünüyor. docs/KURULUM.md'deki adımlara bak.",
-                );
-              }
-            });
-          }}
-        />
+        <CardGroup>
+          <Row title="İmza geçerliliği" subtitle={signatureLabel} icon="signature" />
+          <Separator />
+          <Row
+            title="AltStore'u aç"
+            subtitle="Süre dolmadan Yenile'ye bas"
+            icon="arrow.clockwise"
+            onPress={() => {
+              void openAltStore().then((opened) => {
+                if (!opened) {
+                  Alert.alert(
+                    'AltStore bulunamadı',
+                    "AltStore kurulu değil gibi görünüyor. docs/KURULUM.md'deki adımlara bak.",
+                  );
+                }
+              });
+            }}
+          />
+        </CardGroup>
 
         {/* ------------------------------------------------------------- data */}
         <SectionHeader>Veri</SectionHeader>
-        <Row
-          title="Yedekle"
-          subtitle="Tüm veriyi JSON olarak dışa aktar"
-          icon="square.and.arrow.up"
-          onPress={() => void backup()}
-        />
-        <Separator />
-        <Row
-          title="Geri yükle"
-          subtitle="Bir yedek dosyasından geri dön"
-          icon="square.and.arrow.down"
-          onPress={() => void restore()}
-        />
-        <Separator />
-        <SwitchRow
-          title="Otomatik yedek"
-          subtitle={
-            settings.lastAutoBackupAt
-              ? `Son: ${formatDateTime(new Date(settings.lastAutoBackupAt))}`
-              : 'Haftada bir, Dosyalar › Anımsa › Yedekler'
-          }
-          icon="externaldrive"
-          value={settings.autoBackupEnabled}
-          onValueChange={(v) => void update('autoBackupEnabled', v)}
-        />
-        <Caption style={{ paddingHorizontal: space.lg, paddingTop: space.sm, lineHeight: 19 }}>
-          {"Uygulamayı silersen bu klasör de silinir; önemli yedekleri iCloud Drive'a kopyala."}
-        </Caption>
+        <CardGroup>
+          <Row
+            title="Yedekle"
+            subtitle="Tüm veriyi JSON olarak dışa aktar"
+            icon="square.and.arrow.up"
+            onPress={() => void backup()}
+          />
+          <Separator />
+          <Row
+            title="Geri yükle"
+            subtitle="Bir yedek dosyasından geri dön"
+            icon="square.and.arrow.down"
+            onPress={() => void restore()}
+          />
+          <Separator />
+          <SwitchRow
+            title="Otomatik yedek"
+            subtitle={
+              settings.lastAutoBackupAt
+                ? `Son: ${formatDateTime(new Date(settings.lastAutoBackupAt))}`
+                : 'Haftada bir, Dosyalar › Anımsa › Yedekler'
+            }
+            icon="externaldrive"
+            value={settings.autoBackupEnabled}
+            onValueChange={(v) => void update('autoBackupEnabled', v)}
+          />
+          <Caption style={{ paddingHorizontal: space.lg, paddingTop: space.sm, lineHeight: 19 }}>
+            {"Uygulamayı silersen bu klasör de silinir; önemli yedekleri iCloud Drive'a kopyala."}
+          </Caption>
+        </CardGroup>
 
         {/* --------------------------------------------------------- advanced */}
         <SectionHeader>Gelişmiş</SectionHeader>
-        <Row
-          title="Tüm hatırlatmaları yeniden kur"
-          icon="arrow.triangle.2.circlepath"
-          onPress={rebuild}
-        />
-        <Separator />
-        <Row title="Tanılama" icon="stethoscope" onPress={() => router.navigate('/diagnostics')} />
-        <Separator />
-        <Row
-          title="Tanıtımı tekrar göster"
-          icon="sparkles"
-          onPress={() => {
-            void setSetting('onboardingDone', false).then(() => router.navigate('/onboarding'));
-          }}
-        />
+        <CardGroup>
+          <Row
+            title="Tüm hatırlatmaları yeniden kur"
+            icon="arrow.triangle.2.circlepath"
+            onPress={rebuild}
+          />
+          <Separator />
+          <Row
+            title="Tanılama"
+            icon="stethoscope"
+            onPress={() => router.navigate('/diagnostics')}
+          />
+          <Separator />
+          <Row
+            title="Tanıtımı tekrar göster"
+            icon="sparkles"
+            onPress={() => {
+              void setSetting('onboardingDone', false).then(() => router.navigate('/onboarding'));
+            }}
+          />
+        </CardGroup>
 
         <View style={{ padding: space.xl, alignItems: 'center' }}>
           <Caption>
