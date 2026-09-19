@@ -1,0 +1,74 @@
+name: iOS Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: Hangi varyant derlensin
+        type: choice
+        options: [release, dev]
+        default: release
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios-${{ inputs.variant || 'release' }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yml
+
+  build:
+    needs: check
+    # AlarmKit needs the iOS 26 SDK, so the runner must carry Xcode 26+.
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      APP_VARIANT: ${{ inputs.variant || 'release' }}
+      BUILD_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Xcode version
+        run: |
+          xcodebuild -version
+          # Fail early and loudly rather than deep inside a Swift compile.
+          MAJOR=$(xcodebuild -version | head -n1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+          if [ "$MAJOR" -lt 26 ]; then
+            echo "::error::AlarmKit için Xcode 26+ gerekiyor, bulunan: $MAJOR"
+            exit 1
+          fi
+
+      - run: npm ci
+
+      - name: Prebuild
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Build unsigned IPA
+        run: bash scripts/build-ios.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ipa-${{ env.APP_VARIANT }}-${{ github.run_number }}
+          path: dist/*.ipa
+          retention-days: 30
+
+      - name: Publish release and update AltStore source
+        run: node scripts/publish-release.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_VARIANT: ${{ env.APP_VARIANT }}
+          BUILD_NUMBER: ${{ github.run_number }}

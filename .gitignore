@@ -1,0 +1,14 @@
+node_modules/
+.expo/
+dist/
+build/
+Payload/
+ios/
+android/
+*.log
+.DS_Store
+npm-debug.*
+*.orig.*
+.env
+.env.local
+app.json

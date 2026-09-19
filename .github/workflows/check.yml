@@ -1,0 +1,45 @@
+name: Check
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - run: npm ci
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: npx eslint .
+
+      - name: Jest
+        run: npx jest --ci
+
+      - name: Expo doctor
+        run: npx expo-doctor
+        continue-on-error: true
+
+      - name: Introspect app config
+        run: npx expo config --type introspect --json > config.json
+
+      # The free signing model forbids extra entitlements, and the app records
+      # no audio — both are easy to reintroduce by accident via a plugin.
+      - name: Forbidden keys must be absent, required key present
+        run: node scripts/check-config.mjs config.json

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Orange ground with a white bell over a house silhouette: a reminder,
+       about the home. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF9142" />
+      <stop offset="1" stop-color="#F26A00" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)" />
+
+  <!-- House silhouette. Wide enough that the roof slopes stay visible on both
+       sides of the bell, which is what makes it read as a house at all. -->
+  <g fill="#FFFFFF" opacity="0.26">
+    <path d="M512 336 L912 672 L912 862 Q912 890 884 890 L140 890 Q112 890 112 862 L112 672 Z" />
+  </g>
+
+  <!-- Bell. -->
+  <g fill="#FFFFFF">
+    <path d="M512 196
+             C 486 196 466 216 466 242
+             L 466 258
+             C 372 280 306 364 306 462
+             L 306 578
+             C 306 620 288 660 256 688
+             C 240 702 250 728 272 728
+             L 752 728
+             C 774 728 784 702 768 688
+             C 736 660 718 620 718 578
+             L 718 462
+             C 718 364 652 280 558 258
+             L 558 242
+             C 558 216 538 196 512 196 Z" />
+    <path d="M512 824
+             C 556 824 592 792 598 752
+             L 426 752
+             C 432 792 468 824 512 824 Z" />
+  </g>
+</svg>
