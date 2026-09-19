@@ -55,6 +55,18 @@ for (const key of [...FORBIDDEN_INFO_PLIST, ...FORBIDDEN_ENTITLEMENTS]) {
   }
 }
 
+// Every permission dialog the user can see must be Turkish (SPEC §0.4, §14).
+// Plugins add some of these themselves with English defaults, so check them all
+// rather than only the ones written by hand.
+const TURKISH_LETTERS = /[çğıöşüÇĞİÖŞÜ]/;
+const usageKeys = Object.keys(infoPlist).filter((k) => k.endsWith('UsageDescription'));
+for (const key of usageKeys) {
+  const text = infoPlist[key];
+  if (typeof text !== 'string' || !TURKISH_LETTERS.test(text)) {
+    problems.push(`İzin metni Türkçe görünmüyor: ${key} → "${text}"`);
+  }
+}
+
 const deploymentTarget = (config?.plugins ?? [])
   .filter((p) => Array.isArray(p) && p[0] === 'expo-build-properties')
   .map((p) => p[1]?.ios?.deploymentTarget)
@@ -72,5 +84,5 @@ if (problems.length > 0) {
 
 console.log('✓ Yapılandırma kontrolü geçti');
 console.log(`  · minimum iOS: ${deploymentTarget ?? 'belirtilmemiş'}`);
-console.log(`  · izin anahtarları: ${REQUIRED_INFO_PLIST.length}/${REQUIRED_INFO_PLIST.length}`);
+console.log(`  · izin anahtarları: ${usageKeys.length}, tamamı Türkçe`);
 console.log('  · mikrofon izni yok, push entitlement yok');

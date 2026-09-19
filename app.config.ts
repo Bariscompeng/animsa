@@ -17,6 +17,12 @@ const LOCATION_WHEN_IN_USE =
 const LOCATION_ALWAYS =
   "Markete yaklaştığında veya evden çıktığında uygulama kapalıyken de hatırlatabilmek için 'Her Zaman' konum izni gerekiyor.";
 const CAMERA_USAGE = 'Ürün barkodlarını okuyarak listeye eklemek için kamera kullanılır.';
+// expo-location adds these two itself when background location is enabled, with
+// English defaults. Every string the user can see must be Turkish (SPEC §0.4).
+const LOCATION_ALWAYS_ONLY =
+  'Uygulama kapalıyken de markete yaklaştığında ve evden çıktığında hatırlatabilmek için konumuna ihtiyaç var.';
+const MOTION_USAGE =
+  'Yer bildirimlerini daha az pil harcayarak verebilmek için hareket algılayıcısı kullanılır.';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -41,6 +47,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       NSLocationAlwaysAndWhenInUseUsageDescription: LOCATION_ALWAYS,
       NSCameraUsageDescription: CAMERA_USAGE,
       NSAlarmKitUsageDescription: ALARM_KIT_USAGE,
+      // expo-dev-client is autolinked in both variants and contributes an
+      // English string; override it so no dialog can show English.
+      NSLocalNetworkUsageDescription:
+        'Geliştirme sunucusuna bağlanmak için yerel ağ kullanılır. Günlük kullanımda gerekmez.',
       UIFileSharingEnabled: true,
       LSSupportsOpeningDocumentsInPlace: true,
       LSApplicationQueriesSchemes: ['altstore-classic', 'altstore'],
@@ -81,6 +91,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         isIosBackgroundLocationEnabled: true,
         locationAlwaysAndWhenInUsePermission: LOCATION_ALWAYS,
         locationWhenInUsePermission: LOCATION_WHEN_IN_USE,
+        locationAlwaysPermission: LOCATION_ALWAYS_ONLY,
+        motionUsagePermission: MOTION_USAGE,
       },
     ],
     [
