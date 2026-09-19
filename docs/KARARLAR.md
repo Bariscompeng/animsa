@@ -247,7 +247,31 @@ hariç, modül dizini artık değil.
 geri getirilip test edildi: dosya `git rm --cached` ile izlemeden çıkarıldığında
 koruma doğru şekilde kırmızı veriyor.
 
-## 21. Depo oluşturma kullanıcıya bırakıldı
+## 21. `source.json` hem eski hem yeni AltStore şemasını yazar
+
+Kaynak AltStore'a eklenirken şu hatayı verdi:
+
+```
+No value associated with key CodingKeys
+```
+
+Bu bir Swift `Decodable` hatası: beklenen bir alan yok, ama hangisi olduğu
+söylenmiyor. `faq.altstore.io/developers/make-a-source` dokümanındaki zorunlu
+alanların **tamamı bizde vardı** — çünkü o doküman yeni şemayı anlatıyor.
+
+Kurulu AltStore Classic sürümü, sürüm bilgisini `versions[]` dizisinden değil,
+**uygulama nesnesinin kendisinden** okuyor: `version`, `versionDate`,
+`versionDescription`, `downloadURL`, `size`, ayrıca `screenshotURLs` ve
+`permissions` alanlarının var olmasını bekliyor.
+
+Karar: **ikisi birden yazılıyor.** Yeni sürümler tanımadığı alanları yok sayar,
+eski sürümler çalışır; maliyeti birkaç satır.
+
+`legacyFields()` her zaman **en yeni sürümü** yansıtır, `versions[]` dizisi de
+olduğu gibi durur. `src/domain/altstoreSource.test.ts` bu alanların varlığını
+ve en yeni sürümü yansıttığını doğruluyor.
+
+## 22. Depo oluşturma kullanıcıya bırakıldı
 
 Geliştirme makinesinde GitHub CLI (`gh`) kurulu değil, dolayısıyla
 `gh repo create` çalıştırılamadı. Kod ve iş akışları hazır; depo oluşturma

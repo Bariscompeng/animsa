@@ -184,6 +184,49 @@ describe('upsertVersion', () => {
   });
 });
 
+describe('legacy AltStore Classic fields', () => {
+  // Older builds read the newest version off the app object itself. Omitting
+  // these makes the Swift decoder throw "No value associated with key" and the
+  // source fails to add, with no hint about which key was missing.
+  const LEGACY = [
+    'version',
+    'versionDate',
+    'versionDescription',
+    'downloadURL',
+    'size',
+    'screenshotURLs',
+    'permissions',
+    'subtitle',
+  ];
+
+  it('emits every legacy field on a new app entry', () => {
+    const src = upsertVersion(emptySource(ICON), 'release', version(), META);
+    const app = appFor(src, 'release')! as unknown as Record<string, unknown>;
+    for (const key of LEGACY) {
+      expect(Object.keys(app)).toContain(key);
+    }
+  });
+
+  it('mirrors the newest version in the legacy block', () => {
+    let src = upsertVersion(emptySource(ICON), 'release', version({ buildVersion: '1' }), META);
+    src = upsertVersion(
+      src,
+      'release',
+      version({ buildVersion: '2', downloadURL: 'https://example.invalid/new.ipa' }),
+      META,
+    );
+    const app = appFor(src, 'release')! as unknown as Record<string, unknown>;
+    expect(app.downloadURL).toBe('https://example.invalid/new.ipa');
+    expect(app.versions).toHaveLength(2);
+  });
+
+  it('keeps the modern versions array alongside', () => {
+    const src = upsertVersion(emptySource(ICON), 'release', version(), META);
+    const app = appFor(src, 'release')!;
+    expect(app.versions[0]!.buildVersion).toBe('42');
+  });
+});
+
 describe('url helpers', () => {
   it('builds the permanent source URL', () => {
     expect(sourceUrl('kullanici')).toBe(

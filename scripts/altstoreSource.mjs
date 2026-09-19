@@ -67,6 +67,28 @@ export function emptySource(iconUrl) {
  * @param meta    { iconUrl, privacy }
  * @returns a new source object; the input is not mutated.
  */
+/**
+ * Legacy fields that older AltStore Classic builds read straight off the app
+ * object, before the `versions` array existed.
+ *
+ * Their absence is not a graceful degradation: the app's Swift decoder throws
+ * "No value associated with key", and the whole source fails to add with no
+ * indication of which key was missing. Newer builds ignore these, so emitting
+ * both shapes costs nothing and makes the source work on either.
+ */
+function legacyFields(entry) {
+  return {
+    version: entry.version,
+    versionDate: entry.date,
+    versionDescription: entry.localizedDescription,
+    downloadURL: entry.downloadURL,
+    size: entry.size,
+    // Older builds expect these two to exist, even when empty.
+    screenshotURLs: [],
+    permissions: [],
+  };
+}
+
 export function upsertVersion(source, variant, version, meta) {
   const bundleIdentifier = BUNDLE_IDS[variant];
   if (!bundleIdentifier) throw new Error(`Bilinmeyen varyant: ${variant}`);
@@ -95,10 +117,12 @@ export function upsertVersion(source, variant, version, meta) {
       name: APP_NAMES[variant],
       bundleIdentifier,
       developerName: DEVELOPER_NAME,
+      subtitle: APP_DESCRIPTIONS[variant],
       localizedDescription: APP_DESCRIPTIONS[variant],
       iconURL: meta.iconUrl,
       tintColor: TINT_COLOR,
       category: 'utilities',
+      ...legacyFields(entry),
       versions: [entry],
       appPermissions: { entitlements: [], privacy: meta.privacy },
     });
@@ -113,7 +137,10 @@ export function upsertVersion(source, variant, version, meta) {
 
   next.apps[index] = {
     ...existing,
+    subtitle: existing.subtitle ?? APP_DESCRIPTIONS[variant],
     iconURL: meta.iconUrl,
+    // The legacy block always mirrors the newest version.
+    ...legacyFields(entry),
     versions: [entry, ...withoutDuplicate].slice(0, KEEP_VERSIONS),
     appPermissions: { entitlements: [], privacy: meta.privacy },
   };
