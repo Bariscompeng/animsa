@@ -271,7 +271,46 @@ eski sürümler çalışır; maliyeti birkaç satır.
 olduğu gibi durur. `src/domain/altstoreSource.test.ts` bu alanların varlığını
 ve en yeni sürümü yansıttığını doğruluyor.
 
-## 22. Depo oluşturma kullanıcıya bırakıldı
+## 22. `source.json` depodan servis edilir, release dosyasından değil
+
+AltStore kaynağı eklemeyi ısrarla reddetti:
+
+```
+No value associated with key CodingKeys(stringValue: "name")
+```
+
+Dosyayı, AltStore'un **kabul ettiği** bir kaynağın (OatmealDome) yapısal **alt
+kümesine** indirdik — fazladan tek alan kalmadı, tipler birebir aynı — ve yine
+reddedildi. Aynı AltStore o kaynağı sorunsuz ekliyordu. Yani sorun içerikte
+değildi.
+
+Fark barındırmadaydı:
+
+| | Bizimki | Çalışan |
+|---|---|---|
+| Yönlendirme | `302` → imzalı URL | yok |
+| URL ömrü | ~1 saat | kalıcı |
+| Content-Type | `application/octet-stream` | normal |
+| Yönlendirmesiz gövde | **0 bayt** | — |
+
+GitHub release dosyaları `302` ile süresi dolan imzalı bir URL'ye yönlendiriyor.
+AltStore bu yönlendirmeyi izlemiyor; eline boş gövde geçiyor ve boş gövdeyi
+çözerken ilk zorunlu alanı bulamadığını söylüyor. Hata mesajı bu yüzden
+yanıltıcıydı: eksik olan alan değil, dosyanın kendisiydi.
+
+Karar: kaynak **`raw.githubusercontent.com`** üzerinden, depodaki dosyadan
+servis ediliyor — ikon zaten oradan yükleniyordu ve sorunsuz çalışıyordu.
+
+```
+https://raw.githubusercontent.com/<kullanıcı>/animsa/master/source.json
+```
+
+`publish-release.mjs` her derlemede dosyayı GitHub contents API'siyle depoya
+işliyor (CI'nin git push yapmasına gerek kalmadan). Release dosyası arşiv
+kopyası olarak duruyor. Bu adım başarısız olursa iş **kırmızı düşüyor**: sessizce
+bayatlarsa AltStore bir daha hiç güncelleme göstermez.
+
+## 23. Depo oluşturma kullanıcıya bırakıldı
 
 Geliştirme makinesinde GitHub CLI (`gh`) kurulu değil, dolayısıyla
 `gh repo create` çalıştırılamadı. Kod ve iş akışları hazır; depo oluşturma

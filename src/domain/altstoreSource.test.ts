@@ -29,14 +29,20 @@ type AltApp = {
   name: string;
   bundleIdentifier: string;
   versions: AltVersion[];
-  appPermissions: { entitlements: unknown[]; privacy: Record<string, string> };
+  appPermissions: {
+    entitlements: unknown[];
+    privacy: { name: string; usageDescription: string }[];
+  };
   iconURL: string;
 };
 
 type AltSource = { identifier: string; apps: AltApp[]; news: unknown[]; iconURL: string };
 
 const ICON = 'https://example.invalid/icon.png';
-const META = { iconUrl: ICON, privacy: { NSCameraUsageDescription: 'Kamera' } };
+const META = {
+  iconUrl: ICON,
+  privacy: [{ name: 'NSCameraUsageDescription', usageDescription: 'Kamera' }],
+};
 
 const version = (over: Partial<AltVersion> = {}): AltVersion => ({
   version: '1.0.0',
@@ -53,25 +59,33 @@ const appFor = (src: AltSource, variant: 'release' | 'dev'): AltApp | undefined 
   src.apps.find((a) => a.bundleIdentifier === BUNDLE_IDS[variant]);
 
 describe('privacyFromInfoPlist', () => {
-  it('keeps only *UsageDescription keys', () => {
+  it('keeps only *UsageDescription keys, as named entries', () => {
     const result = privacyFromInfoPlist({
       NSCameraUsageDescription: 'Kamera',
       NSAlarmKitUsageDescription: 'Alarm',
       CFBundleVersion: '42',
       UIFileSharingEnabled: true,
     });
-    expect(result).toEqual({
-      NSCameraUsageDescription: 'Kamera',
-      NSAlarmKitUsageDescription: 'Alarm',
-    });
+    expect(result).toEqual([
+      { name: 'NSCameraUsageDescription', usageDescription: 'Kamera' },
+      { name: 'NSAlarmKitUsageDescription', usageDescription: 'Alarm' },
+    ]);
+  });
+
+  it('gives every entry a name — AltStore fails the whole source without it', () => {
+    const result = privacyFromInfoPlist({ NSCameraUsageDescription: 'Kamera' });
+    for (const entry of result) {
+      expect(typeof entry.name).toBe('string');
+      expect(entry.name.length).toBeGreaterThan(0);
+    }
   });
 
   it('ignores non-string values', () => {
-    expect(privacyFromInfoPlist({ NSFooUsageDescription: 42 })).toEqual({});
+    expect(privacyFromInfoPlist({ NSFooUsageDescription: 42 })).toEqual([]);
   });
 
   it('handles a missing plist', () => {
-    expect(privacyFromInfoPlist(undefined as never)).toEqual({});
+    expect(privacyFromInfoPlist(undefined as never)).toEqual([]);
   });
 });
 
@@ -161,11 +175,11 @@ describe('upsertVersion', () => {
     let src = upsertVersion(emptySource(ICON), 'release', version({ buildVersion: '1' }), META);
     src = upsertVersion(src, 'release', version({ buildVersion: '2' }), {
       iconUrl: ICON,
-      privacy: { NSCameraUsageDescription: 'Yeni metin' },
+      privacy: [{ name: 'NSCameraUsageDescription', usageDescription: 'Yeni metin' }],
     });
-    expect(appFor(src, 'release')!.appPermissions.privacy).toEqual({
-      NSCameraUsageDescription: 'Yeni metin',
-    });
+    expect(appFor(src, 'release')!.appPermissions.privacy).toEqual([
+      { name: 'NSCameraUsageDescription', usageDescription: 'Yeni metin' },
+    ]);
   });
 
   it('does not mutate the input', () => {
@@ -195,7 +209,6 @@ describe('legacy AltStore Classic fields', () => {
     'downloadURL',
     'size',
     'screenshotURLs',
-    'permissions',
     'subtitle',
   ];
 

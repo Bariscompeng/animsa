@@ -32,12 +32,17 @@ const APP_DESCRIPTIONS = {
 /**
  * Every `*UsageDescription` key from the built app's Info.plist.
  * AltStore compares these against the IPA, so they must match exactly.
+ *
+ * Emitted as an ARRAY of `{ name, usageDescription }`, not a dictionary:
+ * AltStore Classic decodes each entry into a type with a required `name`, and
+ * a dictionary makes it fail the whole source with
+ * `No value associated with key CodingKeys(stringValue: "name")`.
  */
 export function privacyFromInfoPlist(infoPlist) {
-  const out = {};
+  const out = [];
   for (const [key, value] of Object.entries(infoPlist ?? {})) {
     if (key.endsWith('UsageDescription') && typeof value === 'string') {
-      out[key] = value;
+      out.push({ name: key, usageDescription: value });
     }
   }
   return out;
@@ -57,17 +62,6 @@ export function emptySource(iconUrl) {
 }
 
 /**
- * Inserts a new version at the head of the matching app entry, creating the
- * entry when the variant appears for the first time.
- *
- * @param source Existing source JSON (or a fresh one from `emptySource`).
- * @param variant 'release' | 'dev'
- * @param version Version payload: version, buildVersion, date, downloadURL,
- *                size, sha256, localizedDescription.
- * @param meta    { iconUrl, privacy }
- * @returns a new source object; the input is not mutated.
- */
-/**
  * Legacy fields that older AltStore Classic builds read straight off the app
  * object, before the `versions` array existed.
  *
@@ -83,12 +77,22 @@ function legacyFields(entry) {
     versionDescription: entry.localizedDescription,
     downloadURL: entry.downloadURL,
     size: entry.size,
-    // Older builds expect these two to exist, even when empty.
+    // Sources this AltStore build accepts always carry this one.
     screenshotURLs: [],
-    permissions: [],
   };
 }
 
+/**
+ * Inserts a new version at the head of the matching app entry, creating the
+ * entry when the variant appears for the first time.
+ *
+ * @param source Existing source JSON (or a fresh one from `emptySource`).
+ * @param variant 'release' | 'dev'
+ * @param version Version payload: version, buildVersion, date, downloadURL,
+ *                size, sha256, localizedDescription.
+ * @param meta    { iconUrl, privacy }
+ * @returns a new source object; the input is not mutated.
+ */
 export function upsertVersion(source, variant, version, meta) {
   const bundleIdentifier = BUNDLE_IDS[variant];
   if (!bundleIdentifier) throw new Error(`Bilinmeyen varyant: ${variant}`);
@@ -121,7 +125,6 @@ export function upsertVersion(source, variant, version, meta) {
       localizedDescription: APP_DESCRIPTIONS[variant],
       iconURL: meta.iconUrl,
       tintColor: TINT_COLOR,
-      category: 'utilities',
       ...legacyFields(entry),
       versions: [entry],
       appPermissions: { entitlements: [], privacy: meta.privacy },

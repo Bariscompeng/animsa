@@ -6,6 +6,7 @@
  * Runs on the macOS runner after scripts/build-ios.sh. All GitHub access goes
  * through `gh`, which the runner already authenticates via GH_TOKEN.
  */
+import { Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -171,9 +172,58 @@ JSON.parse(readFileSync(sourcePath, 'utf8'));
 
 gh(['release', 'upload', SOURCE_TAG, sourcePath, '--clobber']);
 
+/**
+ * The release asset is only an archive copy. AltStore reads the source from
+ * raw.githubusercontent.com, because a release-asset URL answers with a 302 to
+ * an expiring signed URL and AltStore does not follow it — it sees a zero-byte
+ * body and rejects the source with a misleading "missing name key" error.
+ *
+ * Committing through the contents API keeps CI from needing a git push.
+ */
+function commitSourceToRepo(branch) {
+  const encoded = Buffer.from(readFileSync(sourcePath, 'utf8'), 'utf8').toString('base64');
+  const tmp = join(workDir, 'payload.json');
+
+  let sha;
+  try {
+    sha = gh([
+      'api',
+      `repos/${owner}/${repo}/contents/source.json?ref=${branch}`,
+      '-q',
+      '.sha',
+    ]).trim();
+  } catch {
+    sha = ''; // First publish: the file does not exist yet.
+  }
+
+  writeFileSync(
+    tmp,
+    JSON.stringify({
+      message: `Update AltStore source for ${variant} ${version} (${build})`,
+      content: encoded,
+      branch,
+      ...(sha ? { sha } : {}),
+    }),
+    'utf8',
+  );
+
+  gh(['api', '--method', 'PUT', `repos/${owner}/${repo}/contents/source.json`, '--input', tmp]);
+}
+
+try {
+  commitSourceToRepo(iconRef);
+  console.log(`source.json depoya işlendi (${iconRef})`);
+} catch (error) {
+  console.error('::error::source.json depoya yazılamadı — AltStore güncelleme göremez');
+  console.error(String(error));
+  process.exitCode = 1;
+}
+
 console.log('');
 console.log("AltStore kaynak URL'si:");
-console.log(`  ${sourceUrl(owner, repo)}`);
+console.log(`  https://raw.githubusercontent.com/${owner}/${repo}/${iconRef}/source.json`);
+console.log('');
+console.log(`  (arşiv kopyası: ${sourceUrl(owner, repo)})`);
 
 if (existsSync('dist/Info.json')) {
   console.log('');

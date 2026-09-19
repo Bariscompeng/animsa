@@ -25,7 +25,7 @@ AltStore kaynağı (depoyu oluşturduktan sonra, `<kullanıcı>` yerine kendi Gi
 kullanıcı adın):
 
 ```
-https://github.com/<kullanıcı>/animsa/releases/download/altstore-source/source.json
+https://raw.githubusercontent.com/<kullanıcı>/animsa/master/source.json
 ```
 
 ---
