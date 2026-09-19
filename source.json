@@ -1,0 +1,32 @@
+{
+  "name": "Anımsa",
+  "identifier": "com.bariscoskun.animsa.source",
+  "apps": [
+    {
+      "name": "Anımsa",
+      "bundleIdentifier": "com.bariscoskun.animsa",
+      "developerName": "Barış Coşkun",
+      "subtitle": "Görev, alarm, ev listesi ve konum hatırlatıcı.",
+      "localizedDescription": "Görev, alarm, ev listesi ve konum hatırlatıcı.",
+      "iconURL": "https://raw.githubusercontent.com/Bariscompeng/animsa/master/assets/icon.png",
+      "tintColor": "#FF7A1A",
+      "screenshotURLs": [],
+      "version": "1.0.0",
+      "versionDate": "2026-09-19T15:39:36.609Z",
+      "versionDescription": "- Anchor the ios/ gitignore pattern so the module's Swift source is committed",
+      "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-6/Animsa-release-1.0.0-6.ipa",
+      "size": 13472271,
+      "versions": [
+        {
+          "version": "1.0.0",
+          "date": "2026-09-19T15:39:36.609Z",
+          "localizedDescription": "- Anchor the ios/ gitignore pattern so the module's Swift source is committed",
+          "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-6/Animsa-release-1.0.0-6.ipa",
+          "size": 13472271,
+          "minOSVersion": "26.0"
+        }
+      ]
+    }
+  ],
+  "news": []
+}
