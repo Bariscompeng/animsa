@@ -31,9 +31,9 @@ jobs:
       APP_VARIANT: ${{ inputs.variant || 'release' }}
       BUILD_NUMBER: ${{ github.run_number }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: lts/*
           cache: npm
@@ -60,7 +60,7 @@ jobs:
       - name: Build unsigned IPA
         run: bash scripts/build-ios.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ipa-${{ env.APP_VARIANT }}-${{ github.run_number }}
           path: dist/*.ipa

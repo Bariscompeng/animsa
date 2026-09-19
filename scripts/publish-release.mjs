@@ -95,7 +95,33 @@ try {
 
 const workDir = mkdtempSync(join(tmpdir(), 'animsa-source-'));
 const sourcePath = join(workDir, 'source.json');
-const iconUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/assets/icon.png`;
+/**
+ * The icon is served from raw.githubusercontent.com, which needs a real ref.
+ * The default branch is whatever the repo actually uses (`main`, `master`, …),
+ * so it is queried rather than assumed; the commit SHA is the last resort and
+ * is always valid.
+ */
+function defaultBranch() {
+  try {
+    const name = gh([
+      'repo',
+      'view',
+      `${owner}/${repo}`,
+      '--json',
+      'defaultBranchRef',
+      '-q',
+      '.defaultBranchRef.name',
+    ]).trim();
+    if (name) return name;
+  } catch {
+    // Fall through to the environment.
+  }
+  return process.env.GITHUB_SHA ?? 'HEAD';
+}
+
+const iconRef = defaultBranch();
+const iconUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${iconRef}/assets/icon.png`;
+console.log(`İkon dalı: ${iconRef}`);
 
 // Make sure the permanent source tag exists before downloading from it.
 try {
@@ -146,7 +172,7 @@ JSON.parse(readFileSync(sourcePath, 'utf8'));
 gh(['release', 'upload', SOURCE_TAG, sourcePath, '--clobber']);
 
 console.log('');
-console.log('AltStore kaynak URL\'si:');
+console.log("AltStore kaynak URL'si:");
 console.log(`  ${sourceUrl(owner, repo)}`);
 
 if (existsSync('dist/Info.json')) {
