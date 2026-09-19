@@ -133,7 +133,40 @@ App ID tüketir (7 günde 10 sınırı), App Group entitlement'ı ücretsiz imza
 sorun çıkarır, ve AltStore yenilemesi uzantıyla birlikte daha kırılgandır.
 Kullanıcı açıkça isterse ayrıca değerlendirilir.
 
-## 17. Depo oluşturma kullanıcıya bırakıldı
+## 17. Yerel modülün podspec'i `ios/` altında olmalı
+
+İlk gerçek derleme yeşil bitti ama üretilen IPA'da **AlarmKit modülü yoktu** —
+`Frameworks/` içinde yok, ikilide tek sembol yok. Hiçbir adım hata vermedi:
+`requireOptionalNativeModule` `null` döndüğü için `alarms.ts` sessizce bildirime
+düşüyordu. Yani alarm özelliği, kullanıcı sabah kalkamayana kadar "çalışıyor"
+görünecekti.
+
+Sebep: podspec'i `modules/alarm-kit/AlarmKit.podspec` (modül kökü) yazmıştım.
+`expo-modules-autolinking` podspec ararken modülün yalnızca **alt dizinlerini**
+tarıyor (`listFilesInDirectories`), kökteki dosyalara bakmıyor. Podspec
+bulunamayınca `resolveModuleAsync` `null` dönüyor ve modül Podfile'a hiç
+girmiyor.
+
+Kanıt (`expo-modules-autolinking resolve -p apple`):
+
+| Podspec konumu | Sonuç |
+|---|---|
+| `modules/alarm-kit/AlarmKit.podspec` | çözümlenmedi |
+| `modules/alarm-kit/ios/AlarmKit.podspec` | `pod=AlarmKit` |
+
+Bu yüzden podspec `ios/` altına taşındı — kurulu tüm gerçek modüller de böyle
+(`expo-haptics/ios/ExpoHaptics.podspec`). `package.json`'a ayrıca
+`expo.autolinking.nativeModulesDir: "./modules"` eklendi (`create-expo-module
+--local` bunu kendiliğinden yapar).
+
+**İki koruma eklendi**, çünkü bu hatanın kendini belli etme yolu yok:
+
+- `check.yml` → `scripts/check-alarmkit.mjs`: autolinking pod'u ve modül
+  sınıfını çözümleyebiliyor mu? (15 dakikalık macOS derlemesinden **önce**)
+- `build-ios.sh` → aynı betik, derlenmiş `.app` ile: `AlarmKit` izi ana ikilide
+  veya bir framework'te gerçekten var mı?
+
+## 18. Depo oluşturma kullanıcıya bırakıldı
 
 Geliştirme makinesinde GitHub CLI (`gh`) kurulu değil, dolayısıyla
 `gh repo create` çalıştırılamadı. Kod ve iş akışları hazır; depo oluşturma

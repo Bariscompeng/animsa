@@ -60,4 +60,8 @@ if [ -f "$APP/embedded.mobileprovision" ]; then
   exit 1
 fi
 
+# The module is optional at runtime by design, so its absence is silent.
+# Catch it here instead of on the phone at 06:30.
+node "$(dirname "$0")/check-alarmkit.mjs" "$APP"
+
 echo "==> İmzasız IPA hazır"

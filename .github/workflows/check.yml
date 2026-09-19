@@ -43,3 +43,8 @@ jobs:
       # no audio — both are easy to reintroduce by accident via a plugin.
       - name: Forbidden keys must be absent, required key present
         run: node scripts/check-config.mjs config.json
+
+      # A podspec in the wrong place makes the module vanish silently, so check
+      # it here rather than after a 15-minute macOS build.
+      - name: AlarmKit module must be autolinked
+        run: node scripts/check-alarmkit.mjs
