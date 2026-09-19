@@ -12,11 +12,21 @@
       "tintColor": "#FF7A1A",
       "screenshotURLs": [],
       "version": "1.0.0",
-      "versionDate": "2026-09-19T15:39:36.609Z",
-      "versionDescription": "- Anchor the ios/ gitignore pattern so the module's Swift source is committed",
-      "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-6/Animsa-release-1.0.0-6.ipa",
-      "size": 13472271,
+      "versionDate": "2026-09-19T17:42:48.471Z",
+      "versionDescription": "- Fix keyboard overlap and map jumping, and give the UI more structure",
+      "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-7/Animsa-release-1.0.0-7.ipa",
+      "size": 13475530,
       "versions": [
+        {
+          "version": "1.0.0",
+          "buildVersion": "7",
+          "date": "2026-09-19T17:42:48.471Z",
+          "localizedDescription": "- Fix keyboard overlap and map jumping, and give the UI more structure",
+          "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-7/Animsa-release-1.0.0-7.ipa",
+          "size": 13475530,
+          "sha256": "70a83a892c59ea8dcebd0f1756e3ae09491efece5a2ed3825338291f4d51c2ff",
+          "minOSVersion": "26.0"
+        },
         {
           "version": "1.0.0",
           "date": "2026-09-19T15:39:36.609Z",
@@ -25,7 +35,40 @@
           "size": 13472271,
           "minOSVersion": "26.0"
         }
-      ]
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": [
+          {
+            "name": "NSLocationAlwaysAndWhenInUseUsageDescription",
+            "usageDescription": "Markete yaklaştığında veya evden çıktığında uygulama kapalıyken de hatırlatabilmek için 'Her Zaman' konum izni gerekiyor."
+          },
+          {
+            "name": "NSLocationWhenInUseUsageDescription",
+            "usageDescription": "Yakındaki marketleri ve kayıtlı yerlerini gösterebilmek için konumuna ihtiyaç var."
+          },
+          {
+            "name": "NSCameraUsageDescription",
+            "usageDescription": "Ürün barkodlarını okuyarak listeye eklemek için kamera kullanılır."
+          },
+          {
+            "name": "NSLocationAlwaysUsageDescription",
+            "usageDescription": "Uygulama kapalıyken de markete yaklaştığında ve evden çıktığında hatırlatabilmek için konumuna ihtiyaç var."
+          },
+          {
+            "name": "NSAlarmKitUsageDescription",
+            "usageDescription": "Alarmlı görevlerin sessiz modda da çalabilmesi için alarm kurma izni gerekiyor."
+          },
+          {
+            "name": "NSMotionUsageDescription",
+            "usageDescription": "Yer bildirimlerini daha az pil harcayarak verebilmek için hareket algılayıcısı kullanılır."
+          },
+          {
+            "name": "NSLocalNetworkUsageDescription",
+            "usageDescription": "Geliştirme sunucusuna bağlanmak için yerel ağ kullanılır. Günlük kullanımda gerekmez."
+          }
+        ]
+      }
     }
   ],
   "news": []
