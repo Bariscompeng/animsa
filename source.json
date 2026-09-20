@@ -12,11 +12,21 @@
       "tintColor": "#FF7A1A",
       "screenshotURLs": [],
       "version": "1.0.0",
-      "versionDate": "2026-09-19T18:32:25.754Z",
-      "versionDescription": "- Make the quick-add row clear the keyboard, and lift contrast across the UI",
-      "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-9/Animsa-release-1.0.0-9.ipa",
-      "size": 13476338,
+      "versionDate": "2026-09-20T17:01:51.275Z",
+      "versionDescription": "- Redesign the UI around the supplied mockup",
+      "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-10/Animsa-release-1.0.0-10.ipa",
+      "size": 13492980,
       "versions": [
+        {
+          "version": "1.0.0",
+          "buildVersion": "10",
+          "date": "2026-09-20T17:01:51.275Z",
+          "localizedDescription": "- Redesign the UI around the supplied mockup",
+          "downloadURL": "https://github.com/Bariscompeng/animsa/releases/download/release-1.0.0-10/Animsa-release-1.0.0-10.ipa",
+          "size": 13492980,
+          "sha256": "913aff7c1c51774c79aa3d79d314ca4bbe79c74ce2682f2ca8814d419aa60a2b",
+          "minOSVersion": "26.0"
+        },
         {
           "version": "1.0.0",
           "buildVersion": "9",
