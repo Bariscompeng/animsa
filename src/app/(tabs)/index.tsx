@@ -5,24 +5,18 @@
  * hidden behind a toggle so the list stays about what is left to do.
  */
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, SectionList, Text, View } from 'react-native';
+import { Alert, SectionList, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
+import { HeroAction, HeroHeader, SectionTitle } from '@/components/design';
+import { QuickAccess } from '@/components/QuickAccess';
 import { QuickAddBar } from '@/components/QuickAddBar';
 import { SignatureBanner } from '@/components/SignatureBanner';
 import { SuggestionCard } from '@/components/SuggestionCard';
 import { TaskRow } from '@/components/TaskRow';
 import { useToast } from '@/components/Toast';
-import {
-  CardGroup,
-  Caption,
-  EmptyState,
-  Row,
-  Screen,
-  SectionHeader,
-  Separator,
-} from '@/components/ui';
+import { CardGroup, Caption, EmptyState, Row, Screen, Separator } from '@/components/ui';
 import {
   completeOccurrence,
   createTask,
@@ -38,11 +32,20 @@ import type { Occurrence, OccurrenceState, TaskLike } from '@/domain/types';
 import type { ParsedTask } from '@/domain/nlp/parseTaskInput';
 import { getSetting } from '@/db/repos/settings';
 import { scheduleSync } from '@/services/sync';
-import { space } from '@/theme/tokens';
+import { radius, space, type Hue } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
+import type { SFSymbol } from 'expo-symbols';
 
 type Entry = { task: TaskLike; occurrence: Occurrence; overdue: boolean; completed: boolean };
-type Section = { title: string; data: Entry[]; collapsible?: boolean };
+type Section = {
+  title: string;
+  data: Entry[];
+  collapsible?: boolean;
+  icon: SFSymbol;
+  hue: Hue;
+  /** Right-aligned count, e.g. "3 kaldı". */
+  count?: string;
+};
 
 export default function TodayScreen() {
   const { colors } = useTheme();
@@ -147,18 +150,49 @@ export default function TodayScreen() {
       });
 
     const out: Section[] = [];
-    if (overdue.length > 0) out.push({ title: 'Gecikmiş', data: order(overdue) });
-    out.push({ title: 'Bugün', data: order(todayList) });
-    if (tomorrowList.length > 0) out.push({ title: 'Yarın', data: order(tomorrowList) });
+    if (overdue.length > 0) {
+      out.push({
+        title: 'Gecikmiş',
+        data: order(overdue),
+        icon: 'target',
+        hue: 'red',
+        count: `${overdue.length} görev`,
+      });
+    }
+    out.push({
+      title: 'Bugün',
+      data: order(todayList),
+      icon: 'calendar',
+      hue: 'green',
+      count: todayList.length > 0 ? `${todayList.length} kaldı` : undefined,
+    });
+    if (tomorrowList.length > 0) {
+      out.push({
+        title: 'Yarın',
+        data: order(tomorrowList),
+        icon: 'sunrise',
+        hue: 'amber',
+        count: `${tomorrowList.length} görev`,
+      });
+    }
     if (weekList.length > 0) {
       out.push({
         title: 'Bu hafta',
         data: weekExpanded ? order(weekList) : [],
         collapsible: true,
+        icon: 'calendar.badge.clock',
+        hue: 'purple',
+        count: `${weekList.length} görev`,
       });
     }
     if (showCompleted && doneList.length > 0) {
-      out.push({ title: 'Tamamlananlar', data: order(doneList) });
+      out.push({
+        title: 'Tamamlananlar',
+        data: order(doneList),
+        icon: 'checkmark.seal',
+        hue: 'slate',
+        count: `${doneList.length} görev`,
+      });
     }
     return out;
   }, [tasks, states, showCompleted, weekExpanded]);
@@ -173,6 +207,19 @@ export default function TodayScreen() {
         .reduce((total, s) => total + s.data.length, 0),
     [sections],
   );
+
+  /** Figures behind the Quick Access tiles. */
+  const totals = useMemo(() => {
+    const live = tasks.filter((t) => !t.archivedAt);
+    const upcoming = sections
+      .filter((s) => s.title === 'Yarın' || s.title === 'Bu hafta')
+      .reduce((total, s) => total + s.data.length, 0);
+    return {
+      all: live.length,
+      important: live.filter((t) => t.important).length,
+      soon: upcoming,
+    };
+  }, [tasks, sections]);
 
   // ----------------------------------------------------------------- actions
 
@@ -283,33 +330,62 @@ export default function TodayScreen() {
 
   return (
     <Screen>
+      <HeroHeader
+        eyebrow={formatLongDate(new Date())}
+        title="Bugün"
+        subtitle={
+          openCount === 0 ? 'Bugün için planlanmış bir şey yok' : `${openCount} görev seni bekliyor`
+        }
+        actions={
+          <>
+            <HeroAction
+              icon="magnifyingglass"
+              label="Ara"
+              onPress={() => router.navigate('/list')}
+            />
+            <HeroAction
+              icon="gearshape"
+              label="Ayarlar"
+              onPress={() => router.navigate('/settings')}
+            />
+          </>
+        }
+      />
       <SectionList
         sections={sections}
         keyExtractor={(entry) => `${entry.task.id}:${entry.occurrence.occurrenceKey}`}
-        contentInsetAdjustmentBehavior="automatic"
         stickySectionHeadersEnabled={false}
         ListHeaderComponent={
           <View>
-            <View
-              style={{ paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.xs }}
-            >
-              <Text
-                style={{
-                  color: colors.accent,
-                  fontSize: 13,
-                  fontWeight: '700',
-                  letterSpacing: 0.6,
-                }}
-              >
-                {formatLongDate(new Date()).toLocaleUpperCase('tr-TR')}
-              </Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 2 }}>
-                {openCount === 0
-                  ? 'Bugün için planlanmış bir şey yok'
-                  : `${openCount} görev seni bekliyor`}
-              </Text>
-            </View>
             <SignatureBanner />
+            <QuickAccess
+              tiles={[
+                {
+                  key: 'all',
+                  icon: 'calendar',
+                  hue: 'blue',
+                  title: 'Tüm Görevler',
+                  count: totals.all,
+                  onPress: () => setWeekExpanded(true),
+                },
+                {
+                  key: 'important',
+                  icon: 'star.fill',
+                  hue: 'amber',
+                  title: 'Önemli',
+                  count: totals.important,
+                  onPress: () => router.navigate('/task/new'),
+                },
+                {
+                  key: 'soon',
+                  icon: 'clock.fill',
+                  hue: 'purple',
+                  title: 'Yaklaşan',
+                  count: totals.soon,
+                  onPress: () => setWeekExpanded(true),
+                },
+              ]}
+            />
             <SuggestionCard onChanged={refresh} />
           </View>
         }
@@ -327,14 +403,13 @@ export default function TodayScreen() {
         }
         renderSectionHeader={({ section }) => (
           <View>
-            <SectionHeader>{section.title}</SectionHeader>
-            {section.collapsible ? (
-              <Row
-                title={weekExpanded ? 'Bu haftayı gizle' : 'Bu haftayı göster'}
-                icon={weekExpanded ? 'chevron.up' : 'chevron.down'}
-                onPress={() => setWeekExpanded((v) => !v)}
-              />
-            ) : null}
+            <SectionTitle
+              icon={section.icon}
+              hue={section.hue}
+              title={section.title}
+              count={section.count}
+              onPress={section.collapsible ? () => setWeekExpanded((v) => !v) : undefined}
+            />
             {section.data.length === 0 && !section.collapsible ? (
               <Caption style={{ paddingHorizontal: space.lg, paddingBottom: space.md }}>
                 Bugün için planlanmış görev yok.
@@ -342,19 +417,40 @@ export default function TodayScreen() {
             ) : null}
           </View>
         )}
-        renderItem={({ item }) => (
-          <TaskRow
-            task={item.task}
-            occurrence={item.occurrence}
-            overdue={item.overdue}
-            completed={item.completed}
-            onToggle={handleToggle}
-            onOpen={openTask}
-            onSnooze={handleSnooze}
-            onDelete={handleDelete}
-          />
+        renderItem={({ item, index, section }) => {
+          // Rows form one rounded card per section: only the outer corners are
+          // rounded, so the group reads as a single surface.
+          const first = index === 0;
+          const last = index === section.data.length - 1;
+          return (
+            <View
+              style={{
+                marginHorizontal: space.lg,
+                overflow: 'hidden',
+                borderTopLeftRadius: first ? radius.lg : 0,
+                borderTopRightRadius: first ? radius.lg : 0,
+                borderBottomLeftRadius: last ? radius.lg : 0,
+                borderBottomRightRadius: last ? radius.lg : 0,
+              }}
+            >
+              <TaskRow
+                task={item.task}
+                occurrence={item.occurrence}
+                overdue={item.overdue}
+                completed={item.completed}
+                onToggle={handleToggle}
+                onOpen={openTask}
+                onSnooze={handleSnooze}
+                onDelete={handleDelete}
+              />
+            </View>
+          );
+        }}
+        ItemSeparatorComponent={() => (
+          <View style={{ marginHorizontal: space.lg, backgroundColor: colors.card }}>
+            <Separator />
+          </View>
         )}
-        ItemSeparatorComponent={Separator}
         ListFooterComponent={
           <View style={{ paddingTop: space.lg, paddingBottom: space.xxl }}>
             <CardGroup>

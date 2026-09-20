@@ -1,16 +1,21 @@
 /**
- * The orange strip that appears on the Today screen when the sideload
- * signature is about to expire (§3.10). Tapping it opens AltStore.
+ * The strip that appears on the Today screen when the sideload signature is
+ * about to expire (§3.10).
+ *
+ * It carries its own amber gradient rather than the usual card treatment: this
+ * is the one notice where ignoring it means the app stops opening, so it has
+ * to out-rank everything else on the screen.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { Icon } from '@/components/ui';
-import { formatDateTime, formatDuration } from '@/domain/format';
+import { formatDuration } from '@/domain/format';
 import type { SignatureStatus } from '@/domain/provision';
 import { openAltStore } from '@/services/altstore';
 import * as signature from '@/services/signature';
-import { radius, space } from '@/theme/tokens';
+import { hues, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
 
 export function SignatureBanner() {
@@ -34,34 +39,83 @@ export function SignatureBanner() {
 
   if (!status?.showBanner || status.msRemaining === null) return null;
 
+  const remaining = formatDuration(status.msRemaining);
+  const urgent = status.hoursRemaining !== null && status.hoursRemaining < 24;
+
   return (
     <Pressable
       onPress={open}
       accessibilityRole="button"
-      accessibilityLabel={`İmza süresi ${formatDuration(status.msRemaining)} sonra doluyor. AltStore'u açmak için dokun.`}
+      accessibilityLabel={`İmza süresi ${remaining} sonra doluyor. Yenilemek için dokun.`}
       style={({ pressed }) => ({
         marginHorizontal: space.lg,
-        marginTop: space.md,
-        padding: space.lg,
+        marginTop: space.sm,
+        marginBottom: space.md,
         borderRadius: radius.lg,
-        backgroundColor: colors.warningSoft,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: space.md,
-        opacity: pressed ? 0.7 : 1,
+        overflow: 'hidden',
+        opacity: pressed ? 0.85 : 1,
       })}
     >
-      <Icon name="exclamationmark.triangle.fill" color={colors.warning} size={22} />
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: colors.warning, fontSize: 15, fontWeight: '600' }}>
-          İmza {formatDuration(status.msRemaining)} sonra doluyor
-        </Text>
-        <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 2 }}>
-          {status.expiresAt ? formatDateTime(status.expiresAt) : ''}
-          {" · AltStore'u açıp Yenile'ye bas"}
-        </Text>
-      </View>
-      <Icon name="chevron.right" color={colors.warning} size={14} />
+      <LinearGradient
+        colors={
+          urgent
+            ? ['rgba(239,68,68,0.28)', 'rgba(239,68,68,0.10)']
+            : ['rgba(245,158,11,0.28)', 'rgba(245,158,11,0.08)']
+        }
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: space.md,
+          padding: space.md,
+        }}
+      >
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: radius.md,
+            backgroundColor: urgent ? 'rgba(239,68,68,0.22)' : 'rgba(245,158,11,0.22)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Icon
+            name="calendar.badge.exclamationmark"
+            size={22}
+            color={urgent ? hues.red : hues.amber}
+          />
+        </View>
+
+        <View style={{ flex: 1 }}>
+          <Text
+            style={{
+              color: urgent ? hues.red : hues.amber,
+              fontSize: 16,
+              fontWeight: '700',
+            }}
+          >
+            {remaining} sonra doluyor
+          </Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 1 }}>
+            {"AltStore'u açıp Yenile'ye bas"}
+          </Text>
+        </View>
+
+        <View
+          style={{
+            backgroundColor: urgent ? hues.red : hues.amber,
+            borderRadius: radius.pill,
+            paddingHorizontal: space.lg,
+            paddingVertical: space.sm,
+          }}
+        >
+          <Text style={{ color: '#1A1205', fontSize: 15, fontWeight: '700' }}>Yenile</Text>
+        </View>
+
+        <Icon name="chevron.right" size={13} color={colors.textTertiary} />
+      </LinearGradient>
     </Pressable>
   );
 }

@@ -12,6 +12,7 @@ import * as Sharing from 'expo-sharing';
 import { Directory, File, Paths } from 'expo-file-system';
 
 import { SuggestionCard } from '@/components/SuggestionCard';
+import { HeroHeader } from '@/components/design';
 import { useToast } from '@/components/Toast';
 import {
   Body,
@@ -352,6 +353,7 @@ export default function ListScreen() {
 
   return (
     <Screen>
+      <HeroHeader title="Liste" subtitle="Evin ihtiyaçları tek yerde 🛒" />
       <View
         style={{
           flexDirection: 'row',
@@ -398,7 +400,6 @@ export default function ListScreen() {
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
-        contentInsetAdjustmentBehavior="automatic"
         stickySectionHeadersEnabled={false}
         ListHeaderComponent={
           segment === 'list' ? (

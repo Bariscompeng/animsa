@@ -5,9 +5,9 @@
  * chip opens the matching picker so a wrong guess is one tap from being fixed.
  */
 import { useMemo, useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
-import { Chip, Icon, IconButton } from '@/components/ui';
+import { Chip, Icon } from '@/components/ui';
 import { useKeyboardHeight } from '@/components/useKeyboardHeight';
 import { describeRule } from '@/domain/recurrence';
 import { formatRelativeDay, parseDateKey } from '@/domain/format';
@@ -65,8 +65,6 @@ export function QuickAddBar({ onSubmit, onOpenForm, placeholder }: QuickAddProps
     <View
       style={{
         marginBottom: lift,
-        borderTopWidth: 1,
-        borderTopColor: colors.separator,
         backgroundColor: colors.background,
         paddingHorizontal: space.lg,
         paddingTop: space.md,
@@ -94,70 +92,73 @@ export function QuickAddBar({ onSubmit, onOpenForm, placeholder }: QuickAddProps
         </View>
       ) : null}
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View
           style={{
             flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
             gap: space.sm,
-            paddingHorizontal: space.md,
+            paddingLeft: space.sm,
+            paddingRight: space.md,
             borderRadius: radius.pill,
-            backgroundColor: colors.groupedBackground,
+            backgroundColor: colors.card,
             borderWidth: 1,
-            borderColor: canSubmit ? colors.accent : 'transparent',
+            borderColor: canSubmit ? colors.accent : colors.separator,
           }}
         >
-          <Icon name="plus.circle" size={18} color={colors.textTertiary} />
+          <View
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              backgroundColor: colors.cardElevated,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Icon name="plus" size={14} color={colors.textSecondary} />
+          </View>
           <TextInput
             value={text}
             onChangeText={setText}
             onSubmitEditing={() => void submit()}
             returnKeyType="done"
             blurOnSubmit={false}
-            placeholder={placeholder ?? "yarın 9'da ilaç"}
+            placeholder={placeholder ?? 'Yeni görev ekle…'}
             placeholderTextColor={colors.textTertiary}
             accessibilityLabel="Hızlı görev ekleme"
             style={{
               flex: 1,
               minHeight: MIN_TOUCH,
               color: colors.text,
-              fontSize: 17,
+              fontSize: 16,
             }}
           />
         </View>
 
-        {canSubmit ? (
-          <IconButton
-            name="arrow.up.circle.fill"
-            size={32}
-            color={colors.accent}
-            label="Görevi ekle"
-            onPress={() => void submit()}
-          />
-        ) : (
-          <IconButton
-            name="slider.horizontal.3"
-            size={24}
-            color={colors.textSecondary}
-            label="Tam formu aç"
-            onPress={() => onOpenForm(parsed, text)}
-          />
-        )}
-      </View>
-
-      {canSubmit ? (
-        <Text
-          style={{
-            color: colors.textTertiary,
-            fontSize: 12,
-            marginTop: space.sm,
-            textAlign: 'center',
-          }}
+        <Pressable
+          onPress={() => (canSubmit ? void submit() : onOpenForm(parsed, text))}
+          accessibilityRole="button"
+          accessibilityLabel={canSubmit ? 'Görevi ekle' : 'Tam formu aç'}
+          style={({ pressed }) => ({
+            width: 52,
+            height: 52,
+            borderRadius: 26,
+            backgroundColor: colors.accent,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.8 : 1,
+            transform: [{ scale: pressed ? 0.95 : 1 }],
+            shadowColor: colors.accent,
+            shadowOpacity: 0.4,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 4 },
+          })}
         >
-          Ayrıntı için çipe dokun · tam form için sağdaki düğme
-        </Text>
-      ) : null}
+          <Icon name={canSubmit ? 'arrow.up' : 'plus'} size={22} color="#FFFFFF" />
+        </Pressable>
+      </View>
     </View>
   );
 }

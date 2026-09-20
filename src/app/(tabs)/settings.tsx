@@ -8,6 +8,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 
 import { ChoiceRow } from '@/components/ChoiceRow';
+import { HeroHeader } from '@/components/design';
 import { useToast } from '@/components/Toast';
 import {
   Button,
@@ -145,7 +146,8 @@ export default function SettingsScreen() {
 
   return (
     <Screen>
-      <ScrollView contentInsetAdjustmentBehavior="automatic">
+      <HeroHeader title="Ayarlar" subtitle="Uygulamayı kendine göre ayarla ⚙️" />
+      <ScrollView>
         {/* ------------------------------------------------------ permissions */}
         <SectionHeader>İzinler</SectionHeader>
         <CardGroup>

@@ -8,6 +8,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Alert, SectionList, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 
+import { HeroHeader } from '@/components/design';
 import { useToast } from '@/components/Toast';
 import {
   Body,
@@ -168,10 +169,10 @@ export default function PlacesScreen() {
 
   return (
     <Screen>
+      <HeroHeader title="Yerler" subtitle="Doğru yerde hatırlat 📍" />
       <SectionList
         sections={sections}
         keyExtractor={(place) => place.id}
-        contentInsetAdjustmentBehavior="automatic"
         stickySectionHeadersEnabled={false}
         ListHeaderComponent={
           <View>

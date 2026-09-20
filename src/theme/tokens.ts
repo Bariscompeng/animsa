@@ -84,8 +84,35 @@ export const radius = {
   pill: 999,
 } as const;
 
+/**
+ * Accent hues for icon badges and section markers. The design leans on colour
+ * to tell sections apart at a glance, so these are named by role rather than
+ * by hue and stay identical in both themes.
+ */
+export const hues = {
+  blue: '#3B82F6',
+  amber: '#F59E0B',
+  purple: '#8B5CF6',
+  green: '#22C55E',
+  red: '#EF4444',
+  slate: '#64748B',
+  pink: '#EC4899',
+} as const;
+
+export type Hue = keyof typeof hues;
+
+/** 18% wash of a hue, for the circle a badge icon sits in. */
+export function hueSoft(hue: Hue): string {
+  const hex = hues[hue];
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, 0.18)`;
+}
+
 /** Type scale. Screens pick from here instead of inventing sizes. */
 export const type = {
+  display: { size: 34, weight: '800' as const },
   hero: { size: 28, weight: '700' as const },
   title: { size: 22, weight: '700' as const },
   headline: { size: 17, weight: '600' as const },
